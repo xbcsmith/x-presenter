@@ -344,6 +344,6 @@ This plan addresses five critical bugs in the x-presenter codebase that prevent 
 ## Open Questions
 
 1. **Filename handling approach** - Option A (multi-file only), Option B (input/output pair only), or Option C (support both modes)?
-2. **Breaking changes** - Is changing `.ppt` to `.pptx` acceptable, or should we provide a migration path/warning?
-3. **Testing scope** - Should we add formal pytest tests or rely on manual testing for this bugfix phase?
-4. **Directory creation** - Should `--output` automatically create non-existent directories, or error if directory doesn't exist?
+1. **Breaking changes** - Is changing `.ppt` to `.pptx` acceptable, or should we provide a migration path/warning?
+1. **Testing scope** - Should we add formal pytest tests or rely on manual testing for this bugfix phase?
+1. **Directory creation** - Should `--output` automatically create non-existent directories, or error if directory doesn't exist?

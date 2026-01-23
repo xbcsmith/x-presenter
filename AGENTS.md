@@ -5,9 +5,35 @@ code.
 
 ---
 
-## Rule 1: File Naming Conventions
+## Rule 1: File Naming Conventions and Session Documentation
 
-### Markdown Files
+### Summary Files - CRITICAL RESTRICTION
+
+**YOU MUST:**
+
+- Write only ONE phase summary document per session
+- Place phase summaries in `docs/explanation/` directory ONLY
+- Use lowercase filename format: `phase_N_descriptive_name_implementation.md`
+- NEVER write ALL CAPS SUMMARY files to the root of the project
+
+**Examples:**
+
+```text
+CORRECT:
+   docs/explanation/phase_4_filename_handling_implementation.md
+   docs/explanation/phase_5_integration_testing_implementation.md
+
+WRONG:
+   PHASE_4_SUMMARY.md (root level, ALL CAPS)
+   IMPLEMENTATION_REPORT.md (root level, ALL CAPS)
+   Phase4Summary.md (root level)
+```
+
+**Why:** Root-level ALL CAPS files clutter the project repository and violate
+naming conventions. All documentation must be organized in the `docs/`
+directory structure following the Diataxis framework.
+
+### Markdown Files in docs/ and Other Directories
 
 **YOU MUST:**
 

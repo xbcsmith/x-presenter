@@ -513,5 +513,426 @@ class TestModelType:
         assert ModelType.CONFIG.lower_plural() == "configs"
 
 
+class TestRegressionPhase1FileExtension:
+    """Regression tests for Phase 1: File Extension Correction."""
+
+    def test_output_file_extension_is_pptx(self):
+        """Verify output files use .pptx extension (not .ppt)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "test.md")
+            output_file = os.path.join(tmpdir, "output.pptx")
+
+            # Create test markdown
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent")
+
+            # Create presentation
+            converter = MarkdownToPowerPoint()
+            converter.convert(input_file, output_file)
+
+            # Verify output file exists and has correct extension
+            assert os.path.exists(output_file)
+            assert output_file.endswith(".pptx")
+            assert not output_file.endswith(".ppt")
+
+    def test_generated_pptx_is_valid_zip(self):
+        """Verify generated .pptx file is a valid ZIP archive."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "test.md")
+            output_file = os.path.join(tmpdir, "output.pptx")
+
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent")
+
+            converter = MarkdownToPowerPoint()
+            converter.convert(input_file, output_file)
+
+            # Verify it's a valid ZIP file
+            assert zipfile.is_zipfile(output_file)
+
+    def test_pptx_contains_content_types_xml(self):
+        """Verify .pptx contains [Content_Types].xml required for PPTX format."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "test.md")
+            output_file = os.path.join(tmpdir, "output.pptx")
+
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent")
+
+            converter = MarkdownToPowerPoint()
+            converter.convert(input_file, output_file)
+
+            # Verify PPTX structure
+            with zipfile.ZipFile(output_file, "r") as zf:
+                assert "[Content_Types].xml" in zf.namelist()
+
+
+class TestRegressionPhase2ArgumentParsing:
+    """Regression tests for Phase 2: Command-Line Argument Fixes."""
+
+    def test_config_output_path_is_string(self):
+        """Verify output_path in Config is string type (not boolean)."""
+        cfg = Config(
+            filenames=["test.md"],
+            output_path="/tmp/output",
+            background_path="",
+            verbose=False,
+        )
+        assert isinstance(cfg.output_path, str)
+        assert cfg.output_path == "/tmp/output"
+
+    def test_config_output_path_empty_default(self):
+        """Verify output_path defaults to empty string."""
+        cfg = Config(filenames=["test.md"])
+        assert cfg.output_path == ""
+        assert isinstance(cfg.output_path, str)
+
+    def test_config_verbose_is_boolean(self):
+        """Verify verbose flag is boolean type."""
+        cfg = Config(filenames=["test.md"], verbose=True)
+        assert isinstance(cfg.verbose, bool)
+        assert cfg.verbose is True
+
+    def test_config_verbose_defaults_to_false(self):
+        """Verify verbose flag defaults to False."""
+        cfg = Config(filenames=["test.md"])
+        assert cfg.verbose is False
+
+
+class TestRegressionPhase3BackgroundImage:
+    """Regression tests for Phase 3: Background Image Variable Reference."""
+
+    def test_background_image_attribute_exists(self):
+        """Verify MarkdownToPowerPoint.background_image attribute exists."""
+        converter = MarkdownToPowerPoint(background_image="bg.jpg")
+        assert hasattr(converter, "background_image")
+        assert converter.background_image == "bg.jpg"
+
+    def test_background_image_none_when_not_set(self):
+        """Verify background_image is None when not provided."""
+        converter = MarkdownToPowerPoint()
+        assert converter.background_image is None
+
+    def test_convert_with_missing_background_image(self):
+        """Verify conversion works even if background image doesn't exist."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "test.md")
+            output_file = os.path.join(tmpdir, "output.pptx")
+
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent")
+
+            converter = MarkdownToPowerPoint()
+            # Should not raise an error even with non-existent background
+            converter.convert(
+                input_file, output_file, background_image="nonexistent.jpg"
+            )
+
+            assert os.path.exists(output_file)
+
+
+class TestRegressionPhase4FilenameHandling:
+    """Regression tests for Phase 4: Filename Handling Alignment."""
+
+    def test_input_output_pair_mode(self):
+        """Test Mode 1: Input/output pair (input.md output.pptx)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "slides.md")
+            output_file = os.path.join(tmpdir, "custom_presentation.pptx")
+
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent")
+
+            cfg = Config(
+                filenames=[input_file],
+                output_file=output_file,
+                output_path="",
+                verbose=False,
+            )
+
+            create_presentation(cfg)
+
+            assert os.path.exists(output_file)
+            assert output_file.endswith(".pptx")
+
+    def test_single_file_auto_output_mode(self):
+        """Test Mode 2: Single file with auto output (input.md -> input.pptx)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "slides.md")
+
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent")
+
+            cfg = Config(
+                filenames=[input_file],
+                output_file="",
+                output_path="",
+                verbose=False,
+            )
+
+            create_presentation(cfg)
+
+            # Output should be in same directory with .pptx extension
+            expected_output = os.path.join(tmpdir, "slides.pptx")
+            assert os.path.exists(expected_output)
+
+    def test_multiple_files_with_output_directory_mode(self):
+        """Test Mode 3: Multiple files with output directory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create input files
+            input1 = os.path.join(tmpdir, "slides1.md")
+            input2 = os.path.join(tmpdir, "slides2.md")
+            output_dir = os.path.join(tmpdir, "output")
+
+            with open(input1, "w") as f:
+                f.write("# Slide 1\nContent 1")
+            with open(input2, "w") as f:
+                f.write("# Slide 2\nContent 2")
+
+            cfg = Config(
+                filenames=[input1, input2],
+                output_file="",
+                output_path=output_dir,
+                verbose=False,
+            )
+
+            create_presentation(cfg)
+
+            # Verify both outputs created
+            output1 = os.path.join(output_dir, "slides1.pptx")
+            output2 = os.path.join(output_dir, "slides2.pptx")
+            assert os.path.exists(output1)
+            assert os.path.exists(output2)
+
+    def test_output_directory_created_if_not_exists(self):
+        """Verify create_presentation creates output directory if it doesn't exist."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "slides.md")
+            output_dir = os.path.join(tmpdir, "new_output_dir")
+
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent")
+
+            cfg = Config(
+                filenames=[input_file],
+                output_file="",
+                output_path=output_dir,
+                verbose=False,
+            )
+
+            # Directory should not exist yet
+            assert not os.path.exists(output_dir)
+
+            create_presentation(cfg)
+
+            # Directory should now exist
+            assert os.path.exists(output_dir)
+            assert os.path.isdir(output_dir)
+
+
+class TestIntegrationAllFixes:
+    """Integration tests for all fixes working together."""
+
+    def test_all_fixes_with_single_file_and_background(self):
+        """Test all fixes: correct extension, background, verbose output."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create markdown with content
+            input_file = os.path.join(tmpdir, "presentation.md")
+            output_file = os.path.join(tmpdir, "output.pptx")
+
+            with open(input_file, "w") as f:
+                f.write(
+                    "# Title Slide\nIntroduction\n\n---\n\n## Slide 2\n- Point 1\n- Point 2"
+                )
+
+            # Create a simple background image
+            try:
+                from PIL import Image
+
+                bg_file = os.path.join(tmpdir, "bg.jpg")
+                img = Image.new("RGB", (100, 100), color="red")
+                img.save(bg_file)
+
+                cfg = Config(
+                    filenames=[input_file],
+                    output_file=output_file,
+                    output_path="",
+                    background_path=bg_file,
+                    verbose=True,
+                    debug=False,
+                )
+
+                create_presentation(cfg)
+
+                # Verify all aspects
+                assert os.path.exists(output_file)
+                assert output_file.endswith(".pptx")
+                assert zipfile.is_zipfile(output_file)
+            except ImportError:
+                # Skip if Pillow not available
+                pytest.skip("Pillow not available")
+
+    def test_multiple_files_with_output_and_background(self):
+        """Test multiple files with output directory and background image."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create input files
+            input1 = os.path.join(tmpdir, "deck1.md")
+            input2 = os.path.join(tmpdir, "deck2.md")
+            output_dir = os.path.join(tmpdir, "presentations")
+
+            with open(input1, "w") as f:
+                f.write("# First\nContent\n\n---\n\n## Section\nMore content")
+            with open(input2, "w") as f:
+                f.write("# Second\nDifferent content")
+
+            try:
+                from PIL import Image
+
+                bg_file = os.path.join(tmpdir, "background.jpg")
+                img = Image.new("RGB", (100, 100), color="blue")
+                img.save(bg_file)
+
+                cfg = Config(
+                    filenames=[input1, input2],
+                    output_file="",
+                    output_path=output_dir,
+                    background_path=bg_file,
+                    verbose=True,
+                    debug=False,
+                )
+
+                create_presentation(cfg)
+
+                # Verify outputs
+                out1 = os.path.join(output_dir, "deck1.pptx")
+                out2 = os.path.join(output_dir, "deck2.pptx")
+                assert os.path.exists(out1)
+                assert os.path.exists(out2)
+                assert zipfile.is_zipfile(out1)
+                assert zipfile.is_zipfile(out2)
+            except ImportError:
+                pytest.skip("Pillow not available")
+
+    def test_empty_markdown_raises_error(self):
+        """Verify error handling for empty markdown content."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "empty.md")
+            output_file = os.path.join(tmpdir, "output.pptx")
+
+            # Create empty file
+            with open(input_file, "w") as f:
+                f.write("")
+
+            cfg = Config(
+                filenames=[input_file],
+                output_file=output_file,
+                output_path="",
+            )
+
+            with pytest.raises(ValueError):
+                create_presentation(cfg)
+
+    def test_special_characters_in_filenames(self):
+        """Test handling of special characters in filenames."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Use filename with spaces and special chars
+            input_file = os.path.join(tmpdir, "my presentation (draft) v2.md")
+            output_file = os.path.join(tmpdir, "my output (final) v2.pptx")
+
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent with special chars: @#$%")
+
+            cfg = Config(
+                filenames=[input_file],
+                output_file=output_file,
+                output_path="",
+            )
+
+            create_presentation(cfg)
+
+            assert os.path.exists(output_file)
+            assert output_file.endswith(".pptx")
+
+    def test_nested_directory_paths(self):
+        """Test handling of deeply nested directory structures."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create nested directory structure
+            nested_dir = os.path.join(tmpdir, "level1", "level2", "level3")
+            os.makedirs(nested_dir, exist_ok=True)
+
+            input_file = os.path.join(nested_dir, "slides.md")
+            output_dir = os.path.join(tmpdir, "output", "deeply", "nested")
+
+            with open(input_file, "w") as f:
+                f.write("# Title\nContent in nested directory")
+
+            cfg = Config(
+                filenames=[input_file],
+                output_file="",
+                output_path=output_dir,
+            )
+
+            create_presentation(cfg)
+
+            output_file = os.path.join(output_dir, "slides.pptx")
+            assert os.path.exists(output_file)
+
+    def test_markdown_with_various_content_types(self):
+        """Test conversion of markdown with all supported content types."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_file = os.path.join(tmpdir, "complex.md")
+            output_file = os.path.join(tmpdir, "output.pptx")
+
+            # Create markdown with various elements
+            with open(input_file, "w") as f:
+                f.write(
+                    """# Main Title
+This is main content
+
+---
+
+## Slide 2
+- List item 1
+- List item 2
+- List item 3
+
+---
+
+## Slide 3
+Some regular text
+with multiple lines
+
+* Using asterisks
+* For lists too
+
+---
+
+## Final Slide
+More content here
+"""
+                )
+
+            cfg = Config(
+                filenames=[input_file],
+                output_file=output_file,
+                output_path="",
+            )
+
+            create_presentation(cfg)
+
+            assert os.path.exists(output_file)
+            assert zipfile.is_zipfile(output_file)
+
+            # Verify it has multiple slides
+            with zipfile.ZipFile(output_file, "r") as zf:
+                # PPTX slides are in ppt/slides/
+                slide_files = [
+                    name
+                    for name in zf.namelist()
+                    if name.startswith("ppt/slides/slide")
+                ]
+                assert len(slide_files) >= 3
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

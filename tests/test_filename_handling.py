@@ -488,6 +488,8 @@ class TestVerboseOutput:
 
     def test_verbose_flag_enables_logging(self, temp_dir, caplog):
         """Test that verbose flag enables informational logging."""
+        import logging
+
         md_file = os.path.join(temp_dir, "test.md")
         with open(md_file, "w", encoding="utf-8") as f:
             f.write("# Test")
@@ -500,7 +502,12 @@ class TestVerboseOutput:
             verbose=True,
         )
 
-        create_presentation(cfg)
+        with caplog.at_level(logging.INFO):
+            create_presentation(cfg)
 
-        # Should contain conversion information
-        assert "Converting" in caplog.text or len(caplog.records) > 0
+        # Should contain conversion information or stdout message
+        assert (
+            "Converting" in caplog.text
+            or "Presentation saved to" in caplog.text
+            or len(caplog.records) > 0
+        )

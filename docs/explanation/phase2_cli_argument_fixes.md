@@ -104,9 +104,9 @@ The fixes integrate seamlessly with existing components:
 
 1. **Config Dataclass**: Already defines `output_path: str = ""` at
    `config.py:22`, compatible with the new string-based argument
-2. **create_presentation() Function**: Already handles `cfg.output_path`
+1. **create_presentation() Function**: Already handles `cfg.output_path`
    correctly at `converter.py:277-283`, using it to construct output file paths
-3. **Argument Parsing**: The `create()` method properly passes parsed arguments
+1. **Argument Parsing**: The `create()` method properly passes parsed arguments
    to `Config` constructor at `main.py:107`
 
 ## Testing
@@ -116,30 +116,35 @@ The fixes integrate seamlessly with existing components:
 Implemented 18 comprehensive tests in `tests/test_cli_arguments.py` covering:
 
 1. **Output Argument Tests** (5 tests):
+
    - Action correctly set to `store`
    - Accepts relative paths
    - Accepts absolute paths
    - Default is empty string
    - Correctly stores provided paths in Config
 
-2. **Verbose Argument Tests** (4 tests):
+1. **Verbose Argument Tests** (4 tests):
+
    - Uses correct `help` parameter (doesn't fail parsing)
    - Flag sets verbose to True when provided
    - Defaults to False when not provided
    - Short `-v` flag is not defined
 
-3. **Combined Argument Tests** (3 tests):
+1. **Combined Argument Tests** (3 tests):
+
    - `--output` and `--verbose` work together
    - All three flags (`--output`, `--verbose`, `--background`) work together
    - Argument order doesn't matter
 
-4. **Edge Cases** (4 tests):
+1. **Edge Cases** (4 tests):
+
    - Empty string output path
    - Special characters in paths
    - Spaces in directory names
    - Multiple input files with output directory
 
-5. **Config Integration Tests** (2 tests):
+1. **Config Integration Tests** (2 tests):
+
    - Config receives all parsed arguments
    - Optional arguments have correct defaults
 
@@ -241,11 +246,11 @@ functionality needed for:
 1. **Argparse Parameter Names Matter**: Using `description` instead of `help` is
    a common mistake that demonstrates the importance of understanding library
    APIs
-2. **Boolean vs String Actions**: Confusing `store_true` (for flags) with
+1. **Boolean vs String Actions**: Confusing `store_true` (for flags) with
    `store` (for values) is a frequent source of CLI bugs
-3. **Config-CLI Mapping**: The `dest` parameter must map correctly to Config
+1. **Config-CLI Mapping**: The `dest` parameter must map correctly to Config
    dataclass field names for proper integration
-4. **Testing CLI Code**: Using mocks for `sys.argv` enables comprehensive
+1. **Testing CLI Code**: Using mocks for `sys.argv` enables comprehensive
    testing of command-line argument parsing without actual subprocess calls
 
 ## Files Modified

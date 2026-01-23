@@ -157,9 +157,9 @@ elif len(filenames) > 1 and not output_path:
 Enhanced with flexible output path resolution:
 
 1. **Validation**: Checks all input files exist before processing
-2. **Directory Creation**: Creates output directory if needed
-3. **Background Image**: Validates once for all files
-4. **Per-File Output Resolution**:
+1. **Directory Creation**: Creates output directory if needed
+1. **Background Image**: Validates once for all files
+1. **Per-File Output Resolution**:
    - Mode 1: Uses `cfg.output_file` directly
    - Mode 2: Combines `cfg.output_path` with input basename
    - Mode 3: Uses same directory as input, replaces extension
@@ -274,11 +274,13 @@ Updated background image examples to show usage with all three modes.
 ### Breaking Changes
 
 1. **CLI Syntax**: Added `create` subcommand requirement
+
    - Old: `md2ppt input.md output.pptx`
    - New: `md2ppt create input.md output.pptx`
 
-2. **Behavior Change**: Two positional arguments now treated as input/output
+1. **Behavior Change**: Two positional arguments now treated as input/output
    pair
+
    - Old: Both treated as input files
    - New: First is input, second is output filename
 
@@ -375,21 +377,25 @@ $ md2ppt create ch1.md ch2.md --output ./out/ --background header.png
 ### Modified Files
 
 1. **src/presenter/config.py**
+
    - Added `output_file` field to Config dataclass
    - Updated docstring with comprehensive field descriptions
 
-2. **src/presenter/main.py**
+1. **src/presenter/main.py**
+
    - Enhanced `create()` method with mode detection logic
    - Improved error messages for ambiguous arguments
    - Updated help text to describe all modes
 
-3. **src/presenter/converter.py**
+1. **src/presenter/converter.py**
+
    - Refactored `create_presentation()` for flexible output handling
    - Added input validation and directory creation
    - Improved logging with verbose mode support
    - Added comprehensive docstrings
 
-4. **README.md**
+1. **README.md**
+
    - Updated command-line examples with `create` subcommand
    - Added "Usage Modes" section with detailed explanations
    - Updated background image examples for all modes
@@ -398,12 +404,14 @@ $ md2ppt create ch1.md ch2.md --output ./out/ --background header.png
 ### New Files
 
 1. **tests/test_filename_handling.py**
+
    - 31 comprehensive tests
    - 4 test classes covering all modes and edge cases
    - Integration tests with background images
    - Error condition testing
 
-2. **docs/explanation/phase4_filename_handling_implementation.md**
+1. **docs/explanation/phase4_filename_handling_implementation.md**
+
    - This document
    - Complete implementation reference
    - Architecture and design decisions
@@ -427,9 +435,9 @@ $ md2ppt create ch1.md ch2.md --output ./out/ --background header.png
 ## Next Steps
 
 1. **Integration Testing**: Verify all README examples work
-2. **User Feedback**: Test with actual users for UX issues
-3. **Phase 5**: Proceed to full integration testing and validation
-4. **Maintenance**: Update examples as new features are added
+1. **User Feedback**: Test with actual users for UX issues
+1. **Phase 5**: Proceed to full integration testing and validation
+1. **Maintenance**: Update examples as new features are added
 
 ## References
 

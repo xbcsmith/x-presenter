@@ -154,9 +154,9 @@ md2ppt create testdata/content/slides.md output/presentation.pptx --background t
 This will create a PowerPoint presentation with:
 
 1. Title slide: "Agents and MCP Servers: Are the electric sheep safe?"
-2. Slide 1: With bullet points
-3. Slide 2: With bullet points
-4. Slide 3: With an image
+1. Slide 1: With bullet points
+1. Slide 2: With bullet points
+1. Slide 3: With an image
 
 ## Development
 

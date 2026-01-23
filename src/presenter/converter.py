@@ -5,11 +5,14 @@ Core module for converting Markdown presentations to PowerPoint.
 import logging
 import os
 import re
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from pptx import Presentation
 from pptx.enum.text import MSO_AUTO_SIZE
 from pptx.util import Inches, Pt
+
+if TYPE_CHECKING:
+    from .config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +31,31 @@ class MarkdownToPowerPoint:
         self.background_image = background_image
 
     def parse_markdown_slides(self, markdown_content: str) -> List[str]:
-        """
-        Parse markdown content into individual slides using '---' separator.
+        """Parse markdown content into individual slides using '---' separator.
+
+        Splits markdown content by '---' separator and returns list of cleaned
+        slide content. Empty slides are filtered out. Whitespace is normalized.
 
         Args:
-            markdown_content: Raw markdown text
+            markdown_content: Raw markdown text containing one or more slides
+                separated by '---' on its own line
 
         Returns:
-            List of slide content strings
+            List[str]: List of cleaned slide content strings, in order.
+                Each slide is stripped of leading/trailing whitespace.
+                Empty slides are excluded from result.
+
+        Raises:
+            No exceptions raised - returns empty list if no valid slides found
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> content = "# Slide 1\\n---\\n# Slide 2"
+            >>> slides = converter.parse_markdown_slides(content)
+            >>> len(slides)
+            2
+            >>> slides[0]
+            '# Slide 1'
         """
         # Split content by slide separator
         slides = markdown_content.split(self.slide_separator)
@@ -50,14 +70,32 @@ class MarkdownToPowerPoint:
         return cleaned_slides
 
     def parse_slide_content(self, slide_markdown: str) -> Dict[str, Any]:
-        """
-        Parse individual slide content into structured data.
+        """Parse individual slide content into structured data.
+
+        Extracts and structures markdown elements from a single slide including
+        titles, lists, regular text content, and image references. Handles both
+        '-' and '*' style bullet points.
 
         Args:
             slide_markdown: Markdown content for a single slide
 
         Returns:
-            Dictionary with parsed slide elements
+            Dict[str, Any]: Dictionary with keys:
+                'title' (str): Slide title from # or ## heading
+                'content' (List[str]): Regular text content lines
+                'lists' (List[List[str]]): List items grouped by lists
+                'images' (List[Dict]): Image references with 'alt' and 'path'
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> content = "# Title\\n- Item 1\\n- Item 2"
+            >>> data = converter.parse_slide_content(content)
+            >>> data['title']
+            'Title'
+            >>> len(data['lists'])
+            1
+            >>> data['lists'][0]
+            ['Item 1', 'Item 2']
         """
         lines = slide_markdown.strip().split("\n")
         slide_data = {"title": "", "content": [], "images": [], "lists": []}
@@ -109,13 +147,40 @@ class MarkdownToPowerPoint:
 
     def add_slide_to_presentation(
         self, slide_data: Dict[str, Any], base_path: str = ""
-    ):
-        """
-        Add a slide to the presentation based on parsed data.
+    ) -> None:
+        """Add a slide to the presentation based on parsed data.
+
+        Creates a new slide with parsed content including title, text content,
+        bullet lists, and images. Handles background images if configured.
+        Automatically positions content vertically on the slide.
 
         Args:
-            slide_data: Parsed slide data
-            base_path: Base path for resolving relative image paths
+            slide_data: Parsed slide data dictionary with keys:
+                'title': Slide title text (str)
+                'content': Regular text content lines (List[str])
+                'lists': Bullet lists grouped (List[List[str]])
+                'images': Image references with alt text (List[Dict])
+            base_path: Base directory path for resolving relative image paths.
+                Used to resolve ./image.png style references.
+
+        Returns:
+            None
+
+        Side Effects:
+            Adds a new slide to self.presentation with all parsed content.
+            Modifies presentation state by adding shapes (text boxes, images).
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> slide_data = {
+            ...     'title': 'My Slide',
+            ...     'content': ['Some text'],
+            ...     'lists': [['Item 1', 'Item 2']],
+            ...     'images': []
+            ... }
+            >>> converter.add_slide_to_presentation(slide_data)
+            >>> len(converter.presentation.slides) == 1
+            True
         """
         # Use blank slide layout
         slide_layout = self.presentation.slide_layouts[6]  # Blank layout
@@ -226,13 +291,35 @@ class MarkdownToPowerPoint:
         output_file: str,
         background_image: Optional[str] = None,
     ) -> None:
-        """
-        Convert a markdown file to PowerPoint presentation.
+        """Convert a markdown file to PowerPoint presentation.
+
+        Reads markdown content from input file, parses slides separated by '---',
+        and generates a PowerPoint presentation with support for titles, lists,
+        content, and optional background images.
 
         Args:
-            markdown_file: Path to input markdown file
-            output_file: Path to output PowerPoint file
-            background_image: Path to background image file (optional)
+            markdown_file: Path to input markdown file to convert
+            output_file: Path where output .pptx file will be saved
+            background_image: Optional path to background image file for all slides.
+                If provided and file exists, image will be added as background to
+                each slide.
+
+        Returns:
+            None
+
+        Raises:
+            FileNotFoundError: If markdown_file cannot be read
+            ValueError: If markdown content is empty or contains no valid slides
+            IOError: If output file cannot be written
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> converter.convert('slides.md', 'output.pptx')
+            Presentation saved to: output.pptx
+
+            >>> converter = MarkdownToPowerPoint(background_image='bg.jpg')
+            >>> converter.convert('slides.md', 'output.pptx')
+            Presentation saved to: output.pptx
         """
         # Set background image if provided
         if background_image:
@@ -264,31 +351,63 @@ class MarkdownToPowerPoint:
         print(f"Presentation saved to: {output_file}")
 
 
-def create_presentation(cfg) -> None:
-    """Create a PowerPoint presentation from markdown file(s).
+def create_presentation(cfg: Config) -> int:
+    """Create a PowerPoint presentation from one or more markdown files.
 
-    Supports three usage modes:
-    1. Input/output pair: md2ppt create input.md output.pptx
-       - Single input file with explicit output filename
-    2. Single input, auto output: md2ppt create input.md
-       - Single input file, generates output in same directory
-    3. Multiple files with directory: md2ppt create a.md b.md --output ./dir/
-       - Multiple input files, outputs to specified directory
+    Supports three distinct usage modes for flexible file handling:
+
+    Mode 1 - Input/output pair:
+        Single input file with explicit output filename.
+        Example: md2ppt create input.md output.pptx
+        Creates: output.pptx in current directory
+
+    Mode 2 - Single file, auto output:
+        Single input file with auto-generated output name.
+        Example: md2ppt create input.md
+        Creates: input.pptx in same directory as input.md
+
+    Mode 3 - Multiple files with output directory:
+        Multiple input files processed to specified output directory.
+        Example: md2ppt create a.md b.md --output ./presentations/
+        Creates: presentations/a.pptx, presentations/b.pptx
 
     Args:
-        cfg: Config object containing:
-            - filenames: List of input markdown files
-            - output_path: Output directory path (multi-file mode)
-            - output_file: Explicit output filename (input/output pair mode)
-            - background_path: Path to background image file (optional)
-            - verbose: Enable verbose logging
+        cfg: Config dataclass instance containing configuration parameters:
+            filenames (List[str]): List of input markdown file paths to process
+            output_path (str): Output directory path for multi-file mode (Mode 3).
+                Empty string for single-file modes.
+            output_file (str): Explicit output filename for Mode 1.
+                Empty string for Modes 2 and 3.
+            background_path (str): Optional path to background image file.
+                Will be added to all slides if file exists.
+            verbose (bool): Enable verbose logging output
+            debug (bool): Enable debug mode with detailed output
 
     Returns:
-        0 on success
+        int: Return code (0 on success)
 
     Raises:
-        ValueError: If markdown content is empty or invalid
-        FileNotFoundError: If input file cannot be read
+        FileNotFoundError: If any input markdown file does not exist
+        ValueError: If markdown content is empty or contains no valid slides
+        IOError: If output file or directory cannot be created or written
+
+    Examples:
+        >>> from presenter.config import Config
+        >>> from presenter.converter import create_presentation
+        >>> cfg = Config(filenames=['slides.md'], output_file='output.pptx')
+        >>> create_presentation(cfg)
+        Presentation saved to: output.pptx
+        0
+
+        >>> cfg = Config(
+        ...     filenames=['deck1.md', 'deck2.md'],
+        ...     output_path='./presentations/',
+        ...     background_path='template.jpg'
+        ... )
+        >>> create_presentation(cfg)
+        Presentation saved to: presentations/deck1.pptx
+        Presentation saved to: presentations/deck2.pptx
+        0
     """
     # Validate input files exist
     for filename in cfg.filenames:

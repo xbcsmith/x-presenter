@@ -28,15 +28,15 @@ initialization:
 The background image data flows through the system as follows:
 
 1. **CLI Input**: User provides `--background` argument via command line
-2. **Argument Parsing**: `main.py` parses `--background` into
+1. **Argument Parsing**: `main.py` parses `--background` into
    `dest="background_path"`
-3. **Config Object**: `Config` dataclass receives `background_path` field
-4. **Validation**: `create_presentation` validates file existence
-5. **Converter Initialization**: `MarkdownToPowerPoint` constructor accepts
+1. **Config Object**: `Config` dataclass receives `background_path` field
+1. **Validation**: `create_presentation` validates file existence
+1. **Converter Initialization**: `MarkdownToPowerPoint` constructor accepts
    `background_image` parameter
-6. **Slide Rendering**: `add_slide_to_presentation` uses `self.background_image`
+1. **Slide Rendering**: `add_slide_to_presentation` uses `self.background_image`
    for background placement
-7. **Output**: Final PPTX includes background on all slides
+1. **Output**: Final PPTX includes background on all slides
 
 ## Implementation Details
 
@@ -246,15 +246,18 @@ md2ppt create slides.md ../../output_rel_bg.pptx --background background.jpg
 ### Source Code
 
 1. **converter.py**
+
    - No changes required (bug was already fixed)
    - Background image flow verified and documented
    - Path resolution properly implemented
 
-2. **config.py**
+1. **config.py**
+
    - No changes required
    - `background_path` field already supports background images
 
-3. **main.py**
+1. **main.py**
+
    - No changes required
    - `--background` argument already properly defined
 
@@ -283,8 +286,8 @@ The bug appears to have been fixed in a previous phase or by another developer.
 Phase 3 focuses on:
 
 1. **Comprehensive Testing**: Ensuring background image functionality is robust
-2. **Documentation**: Documenting the correct implementation and flow
-3. **Verification**: Confirming no regressions or issues exist
+1. **Documentation**: Documenting the correct implementation and flow
+1. **Verification**: Confirming no regressions or issues exist
 
 ## Summary
 

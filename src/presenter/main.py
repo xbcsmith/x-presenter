@@ -32,13 +32,27 @@ logger = logging.getLogger(__name__)
 
 
 class CmdLine(object):
+    """Command-line interface dispatcher for md2ppt.
+
+    Uses dispatch pattern to route commands to appropriate methods.
+    Currently supports 'create' command for markdown to PowerPoint conversion.
+    """
+
     def __init__(self):
+        """Initialize command-line parser and dispatch to appropriate subcommand.
+
+        Parses first argument to determine subcommand, then invokes corresponding
+        method. Supports 'create' subcommand for presentation generation.
+
+        Raises:
+            SystemExit: If unrecognized command provided
+        """
         parser = argparse.ArgumentParser(
-            description="Pipeline Third Party Notice Tools",
+            description="Convert Markdown presentations to PowerPoint format",
             usage="""md2ppt <command> [<args>]
 
             md2ppt commands are:
-                create      create TPN report from SBOMs
+                create      Convert Markdown file(s) to PowerPoint presentation
             """,
             epilog="""
                 Examples:
@@ -60,13 +74,38 @@ class CmdLine(object):
         # use dispatch pattern to invoke method with same name
         getattr(self, args.command)()
 
-    def create(self):
-        """Create PPT from Markdown.
+    def create(self) -> int:
+        """Create PowerPoint presentation from Markdown file(s).
 
-        Supports three modes:
-        1. Input/output pair: md2ppt create input.md output.pptx
-        2. Single input, auto output: md2ppt create input.md
-        3. Multiple inputs with directory: md2ppt create a.md b.md --output ./dir/
+        Parses command-line arguments and delegates to create_presentation()
+        function. Supports three distinct usage modes:
+
+        Mode 1 - Input/output pair:
+            Single input file with explicit output filename.
+            Usage: md2ppt create input.md output.pptx
+            Creates: output.pptx with content from input.md
+
+        Mode 2 - Single file with auto output:
+            Single input file with auto-generated output name.
+            Usage: md2ppt create input.md
+            Creates: input.pptx in same directory as input.md
+
+        Mode 3 - Multiple files with output directory:
+            Multiple input files to specified output directory.
+            Usage: md2ppt create a.md b.md c.md --output ./presentations/
+            Creates: presentations/a.pptx, presentations/b.pptx, presentations/c.pptx
+
+        Supported options:
+            --output DIR: Output directory (Mode 3) or filename (Mode 1)
+            --background FILE: Background image for all slides
+            --verbose: Enable verbose logging
+            --debug: Enable debug mode
+
+        Returns:
+            int: Return code (0 on success)
+
+        Raises:
+            SystemExit: On argument parsing error or multiple files without --output
         """
         parser = argparse.ArgumentParser(description="Create PPT from Markdown\n")
         parser.add_argument(
@@ -149,8 +188,28 @@ class CmdLine(object):
         return create_presentation(cfg)
 
 
-def main():
-    CmdLine()
+def main() -> int:
+    """Entry point for md2ppt command-line application.
+
+    Initializes command-line interface and processes user commands.
+    Handles both 'create' command for presentation generation.
+
+    Returns:
+        int: Return code (0 on success, non-zero on error)
+
+    Examples:
+        >>> # Run via command line:
+        >>> # md2ppt create slides.md output.pptx
+        >>> # md2ppt create slides.md --background bg.jpg --verbose
+    """
+    try:
+        CmdLine()
+        return 0
+    except SystemExit as e:
+        return e.code if isinstance(e.code, int) else 1
+    except Exception as e:
+        logger.error(f"Fatal error: {e}")
+        return 1
 
 
 if __name__ == "__main__":
