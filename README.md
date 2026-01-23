@@ -1,6 +1,7 @@
 # Presenter
 
-Convert Markdown presentations to PowerPoint format using `---` as slide separators.
+Convert Markdown presentations to PowerPoint format using `---` as slide
+separators.
 
 ## Features
 
@@ -106,22 +107,23 @@ Some additional text content.
 
 ## Example
 
-Using the provided `content/slides.md`:
+Using the provided `testdata/content/slides.md`:
 
 ```bash
-md2ppt content/slides.md output/presentation.pptx
+md2ppt testdata/content/slides.md output/presentation.pptx
 ```
 
 With the provided background image:
 
 ```bash
-md2ppt content/slides.md output/presentation.pptx --background content/background.jpg
+md2ppt testdata/content/slides.md output/presentation.pptx --background testdata/content/background.jpg
 ```
 
 This will create a PowerPoint presentation with:
+
 1. Title slide: "Agents and MCP Servers: Are the electric sheep safe?"
 2. Slide 1: With bullet points
-3. Slide 2: With bullet points  
+3. Slide 2: With bullet points
 4. Slide 3: With an image
 
 ## Development
@@ -144,17 +146,19 @@ mypy src/presenter/
 
 ### Project Structure
 
-```
+```text
 src/
 └── presenter/
     ├── __init__.py
     ├── converter.py      # Core conversion logic
     └── main.py          # Command-line interface
-content/
-├── slides.md        # Example markdown slides
-└── images/          # Image assets
-pyproject.toml       # Project configuration
-README.md           # This file
+testdata/
+├── content/
+│   ├── slides.md        # Example markdown slides
+│   ├── background.jpg   # Example background image
+│   └── images/          # Image assets
+pyproject.toml           # Project configuration
+README.md                # This file
 ```
 
 ## Requirements

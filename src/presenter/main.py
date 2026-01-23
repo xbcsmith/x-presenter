@@ -3,82 +3,113 @@ Command-line interface for the Markdown to PowerPoint converter.
 """
 
 import argparse
+import logging
 import os
 import sys
-from pathlib import Path
+
+from .config import Config
 from .converter import create_presentation
 
 
-def main() -> None:
-    """
-    Convert Markdown presentation to PowerPoint format.
-    """
-    parser = argparse.ArgumentParser(
-        description="Convert Markdown presentation to PowerPoint format",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  md2ppt slides.md presentation.pptx
-  md2ppt content/slides.md output/presentation.pptx --verbose
-  md2ppt slides.md presentation.pptx --background background.jpg
-  md2ppt content/slides.md presentation.pptx -b content/background.jpg --verbose
+def debug_except_hook(type, value, tb):
+    print("Godzilla hates {0}".format(type.__name__))
+    print(str(type))
+    import pdb
+    import traceback
+
+    traceback.print_exception(type, value, tb)
+    pdb.post_mortem(tb)
+
+
+debug = os.environ.get("PRESENTER_DEBUG", False)
+level = logging.INFO
+if debug:
+    sys.excepthook = debug_except_hook
+    level = logging.DEBUG
+log_format = "%(asctime)s %(name)s:%(lineno)d:[%(levelname)s] %(message)s"
+logging.basicConfig(stream=sys.stderr, level=level, format=log_format)
+logger = logging.getLogger(__name__)
+
+
+class CmdLine(object):
+    def __init__(self):
+        parser = argparse.ArgumentParser(
+            description="Pipeline Third Party Notice Tools",
+            usage="""md2ppt <command> [<args>]
+
+            md2ppt commands are:
+                create      create TPN report from SBOMs
+            """,
+            epilog="""
+                Examples:
+                md2ppt create slides.md presentation.pptx
+                md2ppt create testdata/content/slides.md output/presentation.pptx --verbose
+                md2ppt create slides.md presentation.pptx --background background.jpg
+                md2ppt create testdata/content/slides.md presentation.pptx -b testdata/content/background.jpg --verbose
+            """,
+        )
+
+        parser.add_argument("command", help="Subcommand to run")
+        # parse_args defaults to [1:] for args, but you need to
+        # exclude the rest of the args too, or validation will fail
+        args = parser.parse_args(sys.argv[1:2])
+        if not hasattr(self, args.command):
+            logger.error("Unrecognized command")
+            parser.print_help()
+            sys.exit(1)
+        # use dispatch pattern to invoke method with same name
+        getattr(self, args.command)()
+
+    def create(self):
         """
-    )
-    
-    parser.add_argument(
-        'input_file',
-        type=str,
-        help='Path to the Markdown file containing slides separated by "---"'
-    )
-    
-    parser.add_argument(
-        'output_file',
-        type=str,
-        help='Path where the PowerPoint presentation will be saved'
-    )
-    
-    parser.add_argument(
-        '--verbose', '-v',
-        action='store_true',
-        help='Enable verbose output'
-    )
-    
-    parser.add_argument(
-        '--background', '-b',
-        type=str,
-        help='Path to background image file for all slides'
-    )
-    
-    args = parser.parse_args()
-    
-    # Convert to Path objects
-    input_file = Path(args.input_file)
-    output_file = Path(args.output_file)
-    
-    # Check if input file exists
-    if not input_file.exists():
-        print(f"❌ Error: Input file '{input_file}' does not exist", file=sys.stderr)
-        sys.exit(1)
-    
-    if args.verbose:
-        print(f"Converting {input_file} to {output_file}")
-    
-    # Ensure output directory exists
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    
-    # Add .pptx extension if not present
-    if not output_file.suffix:
-        output_file = output_file.with_suffix('.pptx')
-    elif output_file.suffix.lower() not in ['.pptx', '.ppt']:
-        output_file = output_file.with_suffix('.pptx')
-    
-    try:
-        create_presentation(str(input_file), str(output_file), args.background)
-        print(f"✅ Successfully created presentation: {output_file}")
-    except Exception as e:
-        print(f"❌ Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        create PPT from Markdown
+        """
+        parser = argparse.ArgumentParser(description="Create PPT from Markdown\n")
+        parser.add_argument(
+            "--output",
+            dest="output_path",
+            action="store_true",
+            default=False,
+            help="Directory to write ppt to",
+        )
+        parser.add_argument(
+            "--background",
+            dest="background_path",
+            action="store",
+            default="",
+            help="Path to background image file for all slides",
+        )
+        parser.add_argument(
+            "--verbose",
+            dest="verbose",
+            action="store_true",
+            default=False,
+            description="enable verbose output",
+        )
+        parser.add_argument(
+            "--debug",
+            dest="debug",
+            action="store_true",
+            default=False,
+            help="Turn debug on",
+        )
+        parser.add_argument(
+            "filenames",
+            nargs="+",
+            action="store",
+            default=None,
+            help='Path to the Markdown file containing slides separated by"---"',
+        )
+        args = parser.parse_args(sys.argv[2:])
+        info = vars(args)
+        # deepcode ignore PT: <please specify a reason of ignoring this>
+        cfg = Config(**info)
+        return create_presentation(cfg)
+
+
+def main():
+    CmdLine()
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

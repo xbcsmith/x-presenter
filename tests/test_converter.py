@@ -1,45 +1,517 @@
 #!/usr/bin/env python3
 """
-Test script for the Markdown to PowerPoint converter.
+Test suite for the Markdown to PowerPoint converter.
 """
 
-import sys
 import os
-from pathlib import Path
+import sys
+import tempfile
+import zipfile
 
-# Add the current directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pytest
 
-from presenter.converter import create_presentation
+# Add the src directory to Python path
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
+)
+
+from presenter.config import Config, ModelType
+from presenter.converter import MarkdownToPowerPoint, create_presentation
 
 
-def test_converter():
-    """Test the converter with the example slides."""
-    input_file = "content/slides.md"
-    output_file = "test_presentation.pptx"
-    
-    print(f"Converting {input_file} to {output_file}...")
-    
-    try:
-        create_presentation(input_file, output_file)
-        print("✅ Conversion successful!")
-        print(f"📄 Output file: {output_file}")
-        
-        # Check if file was created
-        if os.path.exists(output_file):
-            file_size = os.path.getsize(output_file)
-            print(f"📊 File size: {file_size:,} bytes")
-        else:
-            print("❌ Output file was not created")
-            return False
-            
-        return True
-        
-    except Exception as e:
-        print(f"❌ Error during conversion: {e}")
-        return False
+class TestMarkdownToPowerPointInit:
+    """Test MarkdownToPowerPoint initialization."""
+
+    def test_init_without_background(self):
+        """Test converter initialization without background image."""
+        converter = MarkdownToPowerPoint()
+        assert converter.background_image is None
+        assert converter.presentation is not None
+        assert converter.slide_separator == "---"
+
+    def test_init_with_background(self):
+        """Test converter initialization with background image path."""
+        bg_path = "path/to/background.jpg"
+        converter = MarkdownToPowerPoint(background_image=bg_path)
+        assert converter.background_image == bg_path
+        assert converter.presentation is not None
+
+
+class TestParseMarkdownSlides:
+    """Test markdown slide parsing."""
+
+    def test_parse_single_slide(self):
+        """Test parsing a single slide."""
+        converter = MarkdownToPowerPoint()
+        content = "# Title\nSome content"
+        slides = converter.parse_markdown_slides(content)
+        assert len(slides) == 1
+        assert slides[0] == "# Title\nSome content"
+
+    def test_parse_multiple_slides(self):
+        """Test parsing multiple slides separated by ---."""
+        converter = MarkdownToPowerPoint()
+        content = "# Slide 1\n---\n# Slide 2\n---\n# Slide 3"
+        slides = converter.parse_markdown_slides(content)
+        assert len(slides) == 3
+        assert "Slide 1" in slides[0]
+        assert "Slide 2" in slides[1]
+        assert "Slide 3" in slides[2]
+
+    def test_parse_slides_with_empty_content(self):
+        """Test parsing slides ignores empty content."""
+        converter = MarkdownToPowerPoint()
+        content = "# Slide 1\n---\n\n---\n# Slide 2"
+        slides = converter.parse_markdown_slides(content)
+        assert len(slides) == 2
+        assert "Slide 1" in slides[0]
+        assert "Slide 2" in slides[1]
+
+    def test_parse_slides_with_whitespace(self):
+        """Test parsing handles whitespace correctly."""
+        converter = MarkdownToPowerPoint()
+        content = "  # Slide 1  \n---\n  # Slide 2  "
+        slides = converter.parse_markdown_slides(content)
+        assert len(slides) == 2
+        assert slides[0].strip().startswith("#")
+
+
+class TestParseSlideContent:
+    """Test individual slide content parsing."""
+
+    def test_parse_title_with_hash(self):
+        """Test parsing title with single hash."""
+        converter = MarkdownToPowerPoint()
+        content = "# My Title\nSome content"
+        slide_data = converter.parse_slide_content(content)
+        assert slide_data["title"] == "My Title"
+
+    def test_parse_title_with_double_hash(self):
+        """Test parsing title with double hash."""
+        converter = MarkdownToPowerPoint()
+        content = "## My Subtitle\nSome content"
+        slide_data = converter.parse_slide_content(content)
+        assert slide_data["title"] == "My Subtitle"
+
+    def test_parse_content(self):
+        """Test parsing regular content."""
+        converter = MarkdownToPowerPoint()
+        content = "# Title\nLine 1\nLine 2"
+        slide_data = converter.parse_slide_content(content)
+        assert "Line 1" in slide_data["content"]
+        assert "Line 2" in slide_data["content"]
+
+    def test_parse_list_items(self):
+        """Test parsing bullet point lists."""
+        converter = MarkdownToPowerPoint()
+        content = "# Title\n- Item 1\n- Item 2\n- Item 3"
+        slide_data = converter.parse_slide_content(content)
+        assert len(slide_data["lists"]) == 1
+        assert slide_data["lists"][0] == ["Item 1", "Item 2", "Item 3"]
+
+    def test_parse_list_with_asterisk(self):
+        """Test parsing bullet points with asterisk."""
+        converter = MarkdownToPowerPoint()
+        content = "# Title\n* Item 1\n* Item 2"
+        slide_data = converter.parse_slide_content(content)
+        assert len(slide_data["lists"]) == 1
+        assert slide_data["lists"][0] == ["Item 1", "Item 2"]
+
+    def test_parse_image(self):
+        """Test parsing image markdown."""
+        converter = MarkdownToPowerPoint()
+        content = "# Title\n![alt text](./images/pic.png)"
+        slide_data = converter.parse_slide_content(content)
+        assert len(slide_data["images"]) == 1
+        assert slide_data["images"][0]["alt"] == "alt text"
+        assert slide_data["images"][0]["path"] == "./images/pic.png"
+
+    def test_parse_mixed_content(self):
+        """Test parsing slide with title, content, and lists."""
+        converter = MarkdownToPowerPoint()
+        content = "# Title\nSome text\n- Item 1\n- Item 2"
+        slide_data = converter.parse_slide_content(content)
+        assert slide_data["title"] == "Title"
+        assert "Some text" in slide_data["content"]
+        assert len(slide_data["lists"]) == 1
+
+
+class TestAddSlideToPresentation:
+    """Test slide addition to presentation."""
+
+    def test_add_empty_slide(self):
+        """Test adding a slide with no content."""
+        converter = MarkdownToPowerPoint()
+        slide_data = {"title": "", "content": [], "images": [], "lists": []}
+        converter.add_slide_to_presentation(slide_data)
+        assert len(converter.presentation.slides) == 1
+
+    def test_add_slide_with_title(self):
+        """Test adding a slide with a title."""
+        converter = MarkdownToPowerPoint()
+        slide_data = {
+            "title": "Test Title",
+            "content": [],
+            "images": [],
+            "lists": [],
+        }
+        converter.add_slide_to_presentation(slide_data)
+        assert len(converter.presentation.slides) == 1
+
+    def test_add_slide_with_content(self):
+        """Test adding a slide with content."""
+        converter = MarkdownToPowerPoint()
+        slide_data = {
+            "title": "Title",
+            "content": ["Line 1", "Line 2"],
+            "images": [],
+            "lists": [],
+        }
+        converter.add_slide_to_presentation(slide_data)
+        assert len(converter.presentation.slides) == 1
+
+    def test_add_slide_with_lists(self):
+        """Test adding a slide with bullet lists."""
+        converter = MarkdownToPowerPoint()
+        slide_data = {
+            "title": "Title",
+            "content": [],
+            "images": [],
+            "lists": [["Item 1", "Item 2"]],
+        }
+        converter.add_slide_to_presentation(slide_data)
+        assert len(converter.presentation.slides) == 1
+
+    def test_add_slide_with_missing_image(self):
+        """Test adding a slide with missing image doesn't crash."""
+        converter = MarkdownToPowerPoint()
+        slide_data = {
+            "title": "Title",
+            "content": [],
+            "images": [{"alt": "alt", "path": "/nonexistent/image.png"}],
+            "lists": [],
+        }
+        converter.add_slide_to_presentation(slide_data)
+        assert len(converter.presentation.slides) == 1
+
+    def test_add_slide_with_background_image_missing(self):
+        """Test adding a slide with missing background image doesn't crash."""
+        converter = MarkdownToPowerPoint(background_image="/nonexistent/bg.jpg")
+        slide_data = {
+            "title": "Title",
+            "content": [],
+            "images": [],
+            "lists": [],
+        }
+        converter.add_slide_to_presentation(slide_data)
+        assert len(converter.presentation.slides) == 1
+
+    def test_add_slide_with_invalid_image_file(self):
+        """Test adding a slide with invalid image file that exists but isn't valid."""
+        converter = MarkdownToPowerPoint()
+        with tempfile.NamedTemporaryFile(suffix=".txt", delete=False) as f:
+            f.write(b"This is not an image")
+            invalid_image = f.name
+
+        try:
+            slide_data = {
+                "title": "Title",
+                "content": [],
+                "images": [{"alt": "alt", "path": invalid_image}],
+                "lists": [],
+            }
+            converter.add_slide_to_presentation(slide_data)
+            assert len(converter.presentation.slides) == 1
+        finally:
+            os.unlink(invalid_image)
+
+
+class TestConvert:
+    """Test markdown to PowerPoint conversion."""
+
+    def test_convert_simple_markdown(self):
+        """Test converting a simple markdown file."""
+        converter = MarkdownToPowerPoint()
+
+        # Create temporary markdown file
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write("# Title\nSome content")
+            md_file = f.name
+
+        # Create temporary output file path
+        with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as f:
+            output_file = f.name
+
+        try:
+            converter.convert(md_file, output_file)
+            assert os.path.exists(output_file)
+            assert os.path.getsize(output_file) > 0
+        finally:
+            if os.path.exists(md_file):
+                os.unlink(md_file)
+            if os.path.exists(output_file):
+                os.unlink(output_file)
+
+    def test_convert_multiple_slides(self):
+        """Test converting markdown with multiple slides."""
+        converter = MarkdownToPowerPoint()
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write("# Slide 1\n---\n# Slide 2\n---\n# Slide 3")
+            md_file = f.name
+
+        with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as f:
+            output_file = f.name
+
+        try:
+            converter.convert(md_file, output_file)
+            assert os.path.exists(output_file)
+            # Verify it's a valid PPTX
+            with zipfile.ZipFile(output_file, "r") as zip_ref:
+                assert "[Content_Types].xml" in zip_ref.namelist()
+        finally:
+            if os.path.exists(md_file):
+                os.unlink(md_file)
+            if os.path.exists(output_file):
+                os.unlink(output_file)
+
+    def test_convert_with_background_image(self):
+        """Test converting with background image parameter."""
+        converter = MarkdownToPowerPoint()
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write("# Title\nContent")
+            md_file = f.name
+
+        with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as f:
+            output_file = f.name
+
+        try:
+            # Background doesn't exist, but should not crash
+            converter.convert(md_file, output_file, background_image="/fake/path.jpg")
+            assert os.path.exists(output_file)
+        finally:
+            if os.path.exists(md_file):
+                os.unlink(md_file)
+            if os.path.exists(output_file):
+                os.unlink(output_file)
+
+    def test_convert_empty_markdown_raises_error(self):
+        """Test that converting empty markdown raises ValueError."""
+        converter = MarkdownToPowerPoint()
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write("")  # Empty file
+            md_file = f.name
+
+        with tempfile.NamedTemporaryFile(suffix=".pptx", delete=False) as f:
+            output_file = f.name
+
+        try:
+            with pytest.raises(ValueError, match="No slides found"):
+                converter.convert(md_file, output_file)
+        finally:
+            if os.path.exists(md_file):
+                os.unlink(md_file)
+            if os.path.exists(output_file):
+                os.unlink(output_file)
+
+
+class TestCreatePresentation:
+    """Test create_presentation convenience function."""
+
+    def test_create_presentation_with_config(self):
+        """Test creating presentation with Config object."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write("# Test Title\nContent")
+            md_file = f.name
+
+        try:
+            cfg = Config(
+                filenames=[md_file],
+                output_path="",
+                background_path="",
+                verbose=False,
+                debug=False,
+            )
+            create_presentation(cfg)
+            # Output file should be created with .pptx extension
+            expected_output = os.path.splitext(md_file)[0] + ".pptx"
+            assert os.path.exists(expected_output)
+            os.unlink(expected_output)
+        finally:
+            if os.path.exists(md_file):
+                os.unlink(md_file)
+
+    def test_create_presentation_with_output_path(self):
+        """Test creating presentation with output directory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".md", dir=tmpdir, delete=False
+            ) as f:
+                f.write("# Test Title\nContent")
+                md_file = f.name
+
+            output_dir = os.path.join(tmpdir, "output")
+            os.makedirs(output_dir, exist_ok=True)
+
+            cfg = Config(
+                filenames=[md_file],
+                output_path=output_dir,
+                background_path="",
+                verbose=False,
+                debug=False,
+            )
+            create_presentation(cfg)
+
+            filename = os.path.basename(os.path.splitext(md_file)[0] + ".pptx")
+            expected_output = os.path.join(output_dir, filename)
+            assert os.path.exists(expected_output)
+
+    def test_create_presentation_pptx_extension(self):
+        """Test that output file uses .pptx extension, not .ppt."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
+            f.write("# Test\nContent")
+            md_file = f.name
+
+        try:
+            cfg = Config(
+                filenames=[md_file],
+                output_path="",
+                background_path="",
+                verbose=False,
+                debug=False,
+            )
+            create_presentation(cfg)
+            expected_output = os.path.splitext(md_file)[0] + ".pptx"
+            assert os.path.exists(expected_output)
+            assert expected_output.endswith(".pptx")
+            assert not os.path.exists(os.path.splitext(md_file)[0] + ".ppt")
+            os.unlink(expected_output)
+        finally:
+            if os.path.exists(md_file):
+                os.unlink(md_file)
+
+
+class TestIntegration:
+    """Integration tests using testdata fixtures."""
+
+    def test_convert_testdata_slides(self):
+        """Test converting the testdata slides.md file."""
+        input_file = "testdata/content/slides.md"
+        expected_output = "testdata/content/slides.pptx"
+
+        if not os.path.exists(input_file):
+            pytest.skip(f"Test data not found at {input_file}")
+
+        # Remove output file if it exists from previous test
+        if os.path.exists(expected_output):
+            os.unlink(expected_output)
+
+        cfg = Config(
+            filenames=[input_file],
+            output_path="",
+            background_path="",
+            verbose=False,
+            debug=False,
+        )
+        create_presentation(cfg)
+
+        assert os.path.exists(expected_output)
+        assert os.path.getsize(expected_output) > 0
+
+        # Verify it's a valid PPTX
+        with zipfile.ZipFile(expected_output, "r") as zip_ref:
+            assert "[Content_Types].xml" in zip_ref.namelist()
+
+        # Cleanup
+        os.unlink(expected_output)
+
+    def test_convert_with_background_image(self):
+        """Test converting with the testdata background image."""
+        input_file = "testdata/content/slides.md"
+        background_file = "testdata/content/background.jpg"
+        expected_output = "testdata/content/slides.pptx"
+
+        if not os.path.exists(input_file):
+            pytest.skip(f"Test data not found at {input_file}")
+
+        if os.path.exists(expected_output):
+            os.unlink(expected_output)
+
+        cfg = Config(
+            filenames=[input_file],
+            output_path="",
+            background_path=background_file if os.path.exists(background_file) else "",
+            verbose=False,
+            debug=False,
+        )
+        create_presentation(cfg)
+
+        assert os.path.exists(expected_output)
+        os.unlink(expected_output)
+
+
+class TestConfig:
+    """Test Config dataclass."""
+
+    def test_config_defaults(self):
+        """Test Config initialization with defaults."""
+        cfg = Config()
+        assert cfg.filenames == []
+        assert cfg.output_path == ""
+        assert cfg.background_path == ""
+        assert cfg.verbose is False
+        assert cfg.debug is False
+
+    def test_config_with_values(self):
+        """Test Config initialization with values."""
+        cfg = Config(
+            filenames=["file1.md", "file2.md"],
+            output_path="/output",
+            background_path="/bg.jpg",
+            verbose=True,
+            debug=True,
+        )
+        assert cfg.filenames == ["file1.md", "file2.md"]
+        assert cfg.output_path == "/output"
+        assert cfg.background_path == "/bg.jpg"
+        assert cfg.verbose is True
+        assert cfg.debug is True
+
+    def test_config_as_dict(self):
+        """Test Config.as_dict() method."""
+        cfg = Config(
+            filenames=["test.md"],
+            output_path="/out",
+            background_path="/bg.jpg",
+            verbose=True,
+            debug=False,
+        )
+        cfg_dict = cfg.as_dict()
+        assert isinstance(cfg_dict, dict)
+        assert cfg_dict["filenames"] == ["test.md"]
+        assert cfg_dict["output_path"] == "/out"
+        assert cfg_dict["background_path"] == "/bg.jpg"
+        assert cfg_dict["verbose"] is True
+        assert cfg_dict["debug"] is False
+
+
+class TestModelType:
+    """Test ModelType enum."""
+
+    def test_model_type_config(self):
+        """Test ModelType.CONFIG value."""
+        assert ModelType.CONFIG.value == "Config"
+
+    def test_model_type_lower(self):
+        """Test ModelType.lower() method."""
+        assert ModelType.CONFIG.lower() == "config"
+
+    def test_model_type_lower_plural(self):
+        """Test ModelType.lower_plural() method."""
+        assert ModelType.CONFIG.lower_plural() == "configs"
 
 
 if __name__ == "__main__":
-    success = test_converter()
-    sys.exit(0 if success else 1)
+    pytest.main([__file__, "-v"])
