@@ -2,6 +2,7 @@
 Core module for converting Markdown presentations to PowerPoint.
 """
 
+import logging
 import os
 import re
 from typing import Any, Dict, List, Optional
@@ -9,6 +10,8 @@ from typing import Any, Dict, List, Optional
 from pptx import Presentation
 from pptx.enum.text import MSO_AUTO_SIZE
 from pptx.util import Inches, Pt
+
+logger = logging.getLogger(__name__)
 
 
 class MarkdownToPowerPoint:
@@ -262,25 +265,77 @@ class MarkdownToPowerPoint:
 
 
 def create_presentation(cfg) -> None:
-    """
-    Convenience function to create a PowerPoint presentation from markdown.
+    """Create a PowerPoint presentation from markdown file(s).
+
+    Supports three usage modes:
+    1. Input/output pair: md2ppt create input.md output.pptx
+       - Single input file with explicit output filename
+    2. Single input, auto output: md2ppt create input.md
+       - Single input file, generates output in same directory
+    3. Multiple files with directory: md2ppt create a.md b.md --output ./dir/
+       - Multiple input files, outputs to specified directory
 
     Args:
-        markdown_file: Path to input markdown file
-        output_file: Path to output PowerPoint file
-        background_image: Path to background image file (optional)
+        cfg: Config object containing:
+            - filenames: List of input markdown files
+            - output_path: Output directory path (multi-file mode)
+            - output_file: Explicit output filename (input/output pair mode)
+            - background_path: Path to background image file (optional)
+            - verbose: Enable verbose logging
+
+    Returns:
+        0 on success
+
+    Raises:
+        ValueError: If markdown content is empty or invalid
+        FileNotFoundError: If input file cannot be read
     """
+    # Validate input files exist
     for filename in cfg.filenames:
-        base_name = os.path.splitext(filename)[0]
-        base_name_only = os.path.basename(base_name)
-        output_filename = base_name_only + ".pptx"
-        if cfg.output_path:
-            output_file = os.path.join(cfg.output_path, output_filename)
-        else:
-            output_file = base_name + ".pptx"
-        background_image = None
+        if not os.path.exists(filename):
+            logger.error(f"Input file not found: {filename}")
+            raise FileNotFoundError(f"Input file not found: {filename}")
+
+    # Create output directory if specified and doesn't exist
+    if cfg.output_path and not os.path.exists(cfg.output_path):
+        os.makedirs(cfg.output_path, exist_ok=True)
+        if cfg.verbose:
+            logger.info(f"Created output directory: {cfg.output_path}")
+
+    # Prepare background image (validate once for all files)
+    background_image = None
+    if cfg.background_path:
         if os.path.exists(cfg.background_path):
             background_image = cfg.background_path
+            if cfg.verbose:
+                logger.info(f"Using background image: {background_image}")
+        else:
+            logger.warning(f"Background image not found: {cfg.background_path}")
+
+    # Process each input file
+    for filename in cfg.filenames:
+        # Determine output filename based on mode
+        if cfg.output_file:
+            # Mode 1: Input/output pair - use explicit output filename
+            output_file = cfg.output_file
+            if cfg.verbose:
+                logger.info(f"Converting {filename} -> {output_file}")
+        elif cfg.output_path:
+            # Mode 2: Multiple files with output directory
+            base_name_only = os.path.basename(os.path.splitext(filename)[0])
+            output_filename = base_name_only + ".pptx"
+            output_file = os.path.join(cfg.output_path, output_filename)
+            if cfg.verbose:
+                logger.info(f"Converting {filename} -> {output_file}")
+        else:
+            # Mode 3: Single file, auto-generate output in same directory
+            base_name = os.path.splitext(filename)[0]
+            output_file = base_name + ".pptx"
+            if cfg.verbose:
+                logger.info(f"Converting {filename} -> {output_file}")
+
+        # Create converter and process file
         converter = MarkdownToPowerPoint(background_image)
         converter.convert(filename, output_file, background_image)
+
     return 0

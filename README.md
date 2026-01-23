@@ -30,44 +30,76 @@ pip install python-pptx markdown Pillow
 
 ### Command Line
 
-Use the installed command:
+Use the installed command to convert a single markdown file:
 
 ```bash
-md2ppt input.md output.pptx
+md2ppt create input.md output.pptx
 ```
 
-Or run directly with Python:
+This creates `output.pptx` from `input.md`. To generate output in the same
+directory with auto-generated filename:
 
 ```bash
-python -m presenter.main input.md output.pptx
+md2ppt create input.md
 ```
+
+This creates `input.pptx` from `input.md`.
+
+For multiple files, use the `--output` directory option:
+
+```bash
+md2ppt create file1.md file2.md --output ./presentations/
+```
+
+This creates `presentations/file1.pptx` and `presentations/file2.pptx`.
 
 ### With Background Image
 
-Add a background image to all slides:
+Add a background image to all slides using the `--background` option:
 
 ```bash
-md2ppt input.md output.pptx --background background.jpg
-md2ppt input.md output.pptx -b path/to/background.png
+md2ppt create input.md output.pptx --background background.jpg
+md2ppt create input.md output.pptx -b path/to/background.png
 ```
 
-### Python Module
-
-```python
-from presenter.converter import create_presentation
-
-# Convert markdown to PowerPoint
-create_presentation('slides.md', 'presentation.pptx')
-
-# With background image
-create_presentation('slides.md', 'presentation.pptx', 'background.jpg')
-```
-
-### Direct Script Usage
+Works with all modes:
 
 ```bash
-python src/presenter/converter.py input.md output.pptx
+# Single file with auto output
+md2ppt create input.md --background background.jpg
+
+# Multiple files
+md2ppt create file1.md file2.md --output ./out/ --background background.jpg
 ```
+
+### Usage Modes
+
+The `md2ppt create` command supports three modes:
+
+#### Mode 1: Input/Output Pair
+
+```bash
+md2ppt create input.md output.pptx
+```
+
+Creates `output.pptx` from `input.md`. Use this for explicit output naming.
+
+#### Mode 2: Single File with Auto Output
+
+```bash
+md2ppt create input.md
+```
+
+Creates `input.pptx` in the same directory as `input.md`.
+
+#### Mode 3: Multiple Files with Output Directory
+
+```bash
+md2ppt create file1.md file2.md file3.md --output ./presentations/
+```
+
+Creates `presentations/file1.pptx`, `presentations/file2.pptx`, and
+`presentations/file3.pptx`.
 
 ## Markdown Format
 
@@ -110,13 +142,13 @@ Some additional text content.
 Using the provided `testdata/content/slides.md`:
 
 ```bash
-md2ppt testdata/content/slides.md output/presentation.pptx
+md2ppt create testdata/content/slides.md output/presentation.pptx
 ```
 
 With the provided background image:
 
 ```bash
-md2ppt testdata/content/slides.md output/presentation.pptx --background testdata/content/background.jpg
+md2ppt create testdata/content/slides.md output/presentation.pptx --background testdata/content/background.jpg
 ```
 
 This will create a PowerPoint presentation with:

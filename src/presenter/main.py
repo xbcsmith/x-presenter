@@ -61,8 +61,12 @@ class CmdLine(object):
         getattr(self, args.command)()
 
     def create(self):
-        """
-        create PPT from Markdown
+        """Create PPT from Markdown.
+
+        Supports three modes:
+        1. Input/output pair: md2ppt create input.md output.pptx
+        2. Single input, auto output: md2ppt create input.md
+        3. Multiple inputs with directory: md2ppt create a.md b.md --output ./dir/
         """
         parser = argparse.ArgumentParser(description="Create PPT from Markdown\n")
         parser.add_argument(
@@ -70,7 +74,7 @@ class CmdLine(object):
             dest="output_path",
             action="store",
             default="",
-            help="Directory to write ppt to",
+            help="Directory for output files (multi-file mode) or output filename (single file mode)",
         )
         parser.add_argument(
             "--background",
@@ -98,10 +102,48 @@ class CmdLine(object):
             nargs="+",
             action="store",
             default=None,
-            help='Path to the Markdown file containing slides separated by"---"',
+            help="Input markdown file(s) or input/output pair (input.md output.pptx)",
         )
         args = parser.parse_args(sys.argv[2:])
         info = vars(args)
+
+        # Detect mode and normalize arguments
+        filenames = info.pop("filenames")
+        output_path = info.get("output_path", "")
+        output_file = ""
+
+        # Mode detection:
+        # 1. Exactly 2 positional args + no --output = input/output pair
+        # 2. 1+ args + --output specified = multi-file with output directory
+        # 3. 1 arg + no --output = single file, auto-generate output
+        # 4. 2+ args + no --output + no --output = error
+        if len(filenames) == 2 and not output_path:
+            # Mode 1: Input/output pair
+            info["filenames"] = [filenames[0]]
+            output_file = filenames[1]
+            info["output_file"] = output_file
+        elif len(filenames) >= 1 and output_path:
+            # Mode 2: Multi-file with output directory
+            info["filenames"] = filenames
+            info["output_path"] = output_path
+            info["output_file"] = ""
+        elif len(filenames) == 1 and not output_path:
+            # Mode 3: Single file, auto-generate output
+            info["filenames"] = filenames
+            info["output_path"] = ""
+            info["output_file"] = ""
+        elif len(filenames) > 1 and not output_path:
+            # Mode 4: Error - ambiguous
+            logger.error(
+                "Multiple input files specified without --output directory. "
+                "Use: md2ppt create file1.md file2.md --output ./dir/"
+            )
+            sys.exit(1)
+        else:
+            # Fallback
+            info["filenames"] = filenames
+            info["output_file"] = ""
+
         # deepcode ignore PT: <please specify a reason of ignoring this>
         cfg = Config(**info)
         return create_presentation(cfg)

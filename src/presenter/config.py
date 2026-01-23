@@ -24,10 +24,20 @@ class Model:
 
 @dataclass
 class Config(Model):
-    """Data class for Config"""
+    """Data class for Config.
+
+    Attributes:
+        filenames: List of input markdown files to process
+        output_path: Directory path for output files
+        output_file: Explicit output filename (for single input/output pair mode)
+        background_path: Path to background image file
+        verbose: Enable verbose output logging
+        debug: Enable debug mode with detailed output
+    """
 
     filenames: List[str] = field(default_factory=list)
     output_path: str = ""
+    output_file: str = ""
     background_path: str = ""
     verbose: bool = False
     debug: bool = False
