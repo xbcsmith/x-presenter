@@ -68,8 +68,8 @@ class CmdLine(object):
         parser.add_argument(
             "--output",
             dest="output_path",
-            action="store_true",
-            default=False,
+            action="store",
+            default="",
             help="Directory to write ppt to",
         )
         parser.add_argument(
@@ -84,7 +84,7 @@ class CmdLine(object):
             dest="verbose",
             action="store_true",
             default=False,
-            description="enable verbose output",
+            help="enable verbose output",
         )
         parser.add_argument(
             "--debug",
