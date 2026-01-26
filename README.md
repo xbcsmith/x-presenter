@@ -7,8 +7,10 @@ separators.
 
 - Convert Markdown files to PowerPoint presentations (.pptx)
 - Support for slides separated by `---`
+- Automatic title slide detection (centered layout for first slide)
 - Handle titles (# and ##), bullet points, regular text, and images
 - Optional background image support for all slides
+- Speaker notes support using HTML comments
 - Command-line interface for easy usage
 - Preserve relative image paths
 
@@ -72,6 +74,40 @@ md2ppt create input.md --background background.jpg
 md2ppt create file1.md file2.md --output ./out/ --background background.jpg
 ```
 
+### With Color Customization
+
+Customize slide colors using the color flags. All colors use hexadecimal format
+(`RRGGBB` or `#RRGGBB` - the `#` prefix is optional):
+
+```bash
+# Set content slide colors (# prefix is optional)
+md2ppt create input.md output.pptx --background-color 1E3A8A --font-color FFFFFF
+
+# Set title slide colors
+md2ppt create input.md output.pptx --title-bg-color 0F172A --title-font-color F59E0B
+
+# Combine multiple color options (with # prefix also works)
+md2ppt create input.md output.pptx \
+    --background-color "#1E3A8A" \
+    --font-color "#FFFFFF" \
+    --title-bg-color "#0F172A" \
+    --title-font-color "#F59E0B"
+
+# Combine with background image and other options
+md2ppt create input.md output.pptx \
+    --background background.jpg \
+    --font-color FFFFFF \
+    --title-font-color F59E0B \
+    --verbose
+```
+
+Available color flags:
+
+- `--background-color`: Background color for content slides
+- `--font-color`: Font color for content slides
+- `--title-bg-color`: Background color for title slide
+- `--title-font-color`: Font color for title slide
+
 ### Usage Modes
 
 The `md2ppt create` command supports three modes:
@@ -129,13 +165,122 @@ Some additional text content.
 ---
 ```
 
+### Slide Layouts
+
+The converter automatically uses different PowerPoint layouts based on slide
+position and heading style:
+
+- **Title Slide**: The first slide starting with `#` (single hash) uses the
+  centered Title Slide layout, perfect for presentation openings
+- **Title and Content**: All other slides use the Title and Content layout with
+  title at the top and body content below
+
+Example:
+
+```markdown
+# My Presentation Title
+
+<!-- This becomes a centered title slide -->
+
+---
+
+## Introduction
+
+This slide has title at top, content below
+
+- Bullet point 1
+- Bullet point 2
+
+---
+
+# Another Section
+
+<!-- Even with single #, this uses Title and Content layout (not first slide) -->
+```
+
 ### Supported Elements
 
 - **Titles**: `#` and `##` headings become slide titles
-- **Lists**: Bullet points using `-` or `*`
+- **Lists**: Bullet points using `-` or `*` (supports multi-line items with
+  indented continuations)
 - **Text**: Regular paragraphs
 - **Images**: Markdown image syntax `![alt](path)`
 - **Slide Separators**: `---` creates new slides
+- **Speaker Notes**: HTML comments `<!-- note -->` become presenter notes
+- **Layouts**: First slide with `#` gets centered Title Slide layout, all others
+  get Title and Content layout
+
+### Speaker Notes
+
+Add speaker notes to your slides using HTML comment syntax. These notes will be
+invisible on the slides but visible in PowerPoint's presenter view:
+
+```markdown
+# Slide Title
+
+Slide content visible to audience
+
+<!-- This is a speaker note - only visible to the presenter -->
+
+- Bullet point 1
+- Bullet point 2
+
+<!-- You can add multiple notes per slide -->
+```
+
+Speaker notes support:
+
+- Single-line and multi-line comments
+- Multiple comments per slide (combined automatically)
+- Special characters and Unicode
+- Markdown syntax (preserved as-is in notes)
+
+Example with multi-line notes:
+
+```markdown
+## Key Metrics
+
+Our quarterly results:
+
+<!--
+Timing: 3 minutes
+
+Key talking points:
+- Emphasize the 25% revenue growth
+- Mention customer satisfaction improvements
+- Transition to detailed breakdown next
+-->
+
+- Revenue: +25%
+- Customers: +1,500
+- Satisfaction: 92%
+```
+
+For more details, see `docs/explanation/speaker_notes_implementation.md`.
+
+### Multi-Line List Items
+
+List items can span multiple lines by indenting continuation lines. This is
+useful for long bullet points that need to wrap:
+
+```markdown
+## Slide Title
+
+- a really long sentence that runs on for a long time and continues on the next
+  line with indentation
+- another list item that also wraps to the next line
+- short item
+```
+
+The continuation lines (indented with spaces or tabs) will be combined with the
+previous bullet point into a single list item in the presentation.
+
+Key points:
+
+- Continuation lines must be indented (start with space or tab)
+- Both `-` and `*` bullet styles support continuations
+- Multiple continuation lines are all combined into one item
+- Empty lines between list items are preserved (won't split the list)
 
 ## Example
 
@@ -192,6 +337,24 @@ testdata/
 pyproject.toml           # Project configuration
 README.md                # This file
 ```
+
+## Command-Line Options Reference
+
+### Create Command Options
+
+- `--output DIR` or `-o DIR`: Output directory for multiple files, or output
+  filename for single file
+- `--background FILE` or `-b FILE`: Path to background image for all slides
+- `--background-color COLOR`: Background color for content slides (hex:
+  `RRGGBB` or `#RRGGBB`)
+- `--font-color COLOR`: Font color for content slides (hex: `RRGGBB` or
+  `#RRGGBB`)
+- `--title-bg-color COLOR`: Background color for title slide (hex: `RRGGBB` or
+  `#RRGGBB`)
+- `--title-font-color COLOR`: Font color for title slide (hex: `RRGGBB` or
+  `#RRGGBB`)
+- `--verbose`: Enable verbose output logging
+- `--debug`: Enable debug mode with detailed output
 
 ## Requirements
 

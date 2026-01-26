@@ -8,6 +8,7 @@ import re
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from pptx import Presentation
+from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_AUTO_SIZE
 from pptx.util import Inches, Pt
 
@@ -20,15 +21,71 @@ logger = logging.getLogger(__name__)
 class MarkdownToPowerPoint:
     """Convert Markdown presentations to PowerPoint format."""
 
-    def __init__(self, background_image: Optional[str] = None):
+    def __init__(
+        self,
+        background_image: Optional[str] = None,
+        background_color: Optional[str] = None,
+        font_color: Optional[str] = None,
+        title_bg_color: Optional[str] = None,
+        title_font_color: Optional[str] = None,
+    ):
         """Initialize the converter.
 
         Args:
             background_image: Path to background image file (optional)
+            background_color: Background color for content slides (hex: RRGGBB or #RRGGBB)
+            font_color: Font color for content slides (hex: RRGGBB or #RRGGBB)
+            title_bg_color: Background color for title slide (hex: RRGGBB or #RRGGBB)
+            title_font_color: Font color for title slide (hex: RRGGBB or #RRGGBB)
         """
         self.presentation = Presentation()
         self.slide_separator = "---"
         self.background_image = background_image
+        self.background_color = self._parse_color(background_color)
+        self.font_color = self._parse_color(font_color)
+        self.title_bg_color = self._parse_color(title_bg_color)
+        self.title_font_color = self._parse_color(title_font_color)
+
+    def _parse_color(self, color_str: Optional[str]) -> Optional[RGBColor]:
+        """Parse hex color string to RGBColor object.
+
+        Args:
+            color_str: Hex color string (RRGGBB or #RRGGBB) or None
+
+        Returns:
+            RGBColor object or None if color_str is None/empty
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> color = converter._parse_color("FF0000")
+            >>> color.rgb == (255, 0, 0)
+            True
+            >>> color = converter._parse_color("#00FF00")
+            >>> color.rgb == (0, 255, 0)
+            True
+            >>> converter._parse_color(None) is None
+            True
+        """
+        if not color_str:
+            return None
+
+        # Remove # if present
+        color_str = color_str.lstrip("#")
+
+        # Validate hex string
+        if len(color_str) != 6:
+            logger.warning(f"Invalid color format: {color_str}. Expected RRGGBB.")
+            return None
+
+        try:
+            # Convert hex to RGB
+            r = int(color_str[0:2], 16)
+            g = int(color_str[2:4], 16)
+            b = int(color_str[4:6], 16)
+            return RGBColor(r, g, b)
+        except ValueError:
+            logger.warning(f"Invalid hex color: {color_str}")
+            return None
 
     def parse_markdown_slides(self, markdown_content: str) -> List[str]:
         """Parse markdown content into individual slides using '---' separator.
@@ -73,8 +130,10 @@ class MarkdownToPowerPoint:
         """Parse individual slide content into structured data.
 
         Extracts and structures markdown elements from a single slide including
-        titles, lists, regular text content, and image references. Handles both
-        '-' and '*' style bullet points.
+        titles, lists, regular text content, image references, and HTML comments
+        (which are treated as speaker notes). Handles both '-' and '*' style
+        bullet points. Supports multi-line list items where continuation lines
+        are indented.
 
         Args:
             slide_markdown: Markdown content for a single slide
@@ -85,6 +144,7 @@ class MarkdownToPowerPoint:
                 'content' (List[str]): Regular text content lines
                 'lists' (List[List[str]]): List items grouped by lists
                 'images' (List[Dict]): Image references with 'alt' and 'path'
+                'speaker_notes' (str): Combined text from HTML comments
 
         Examples:
             >>> converter = MarkdownToPowerPoint()
@@ -96,38 +156,102 @@ class MarkdownToPowerPoint:
             1
             >>> data['lists'][0]
             ['Item 1', 'Item 2']
+            >>> content_multiline = "# Title\\n- Item 1\\n  continuation"
+            >>> data = converter.parse_slide_content(content_multiline)
+            >>> data['lists'][0][0]
+            'Item 1 continuation'
         """
-        lines = slide_markdown.strip().split("\n")
-        slide_data = {"title": "", "content": [], "images": [], "lists": []}
+        # First, extract all HTML comments as speaker notes
+        comment_pattern = r"<!--\s*(.*?)\s*-->"
+        speaker_notes = []
+
+        # Find all comments and collect their content
+        for match in re.finditer(comment_pattern, slide_markdown, re.DOTALL):
+            note_text = match.group(1).strip()
+            if note_text:
+                speaker_notes.append(note_text)
+
+        # Remove HTML comments from the slide content
+        slide_markdown_clean = re.sub(
+            comment_pattern, "", slide_markdown, flags=re.DOTALL
+        )
+
+        lines = slide_markdown_clean.split("\n")
+        slide_data = {
+            "title": "",
+            "content": [],
+            "images": [],
+            "lists": [],
+            "speaker_notes": "\n\n".join(speaker_notes),
+        }
 
         current_list = []
         in_list = False
 
-        for line in lines:
-            line = line.strip()
-            if not line:
+        for i, line in enumerate(lines):
+            # Store original line to check for indentation
+            original_line = line
+            line_stripped = line.strip()
+
+            # Skip empty lines, but be smart about lists
+            if not line_stripped:
+                # Check if the next non-empty line is a list item
+                next_is_list = False
+                for j in range(i + 1, len(lines)):
+                    next_line = lines[j].strip()
+                    if next_line:
+                        if next_line.startswith("- ") or next_line.startswith("* "):
+                            next_is_list = True
+                        break
+
+                # Only close the list if next line is NOT a list item
+                if in_list and current_list and not next_is_list:
+                    slide_data["lists"].append(current_list)
+                    current_list = []
+                    in_list = False
                 continue
 
             # Check for title (# or ##)
-            if line.startswith("# "):
-                slide_data["title"] = line[2:].strip()
-            elif line.startswith("## "):
-                slide_data["title"] = line[3:].strip()
+            if line_stripped.startswith("# "):
+                if in_list and current_list:
+                    slide_data["lists"].append(current_list)
+                    current_list = []
+                    in_list = False
+                slide_data["title"] = line_stripped[2:].strip()
+
+            elif line_stripped.startswith("## "):
+                if in_list and current_list:
+                    slide_data["lists"].append(current_list)
+                    current_list = []
+                    in_list = False
+                slide_data["title"] = line_stripped[3:].strip()
 
             # Check for images
-            elif line.startswith("!["):
-                image_match = re.match(r"!\[([^\]]*)\]\(([^)]+)\)", line)
+            elif line_stripped.startswith("!["):
+                if in_list and current_list:
+                    slide_data["lists"].append(current_list)
+                    current_list = []
+                    in_list = False
+                image_match = re.match(r"!\[([^\]]*)\]\(([^)]+)\)", line_stripped)
                 if image_match:
                     alt_text = image_match.group(1)
                     image_path = image_match.group(2)
                     slide_data["images"].append({"alt": alt_text, "path": image_path})
 
-            # Check for list items
-            elif line.startswith("- ") or line.startswith("* "):
+            # Check for list items (new bullet point)
+            elif line_stripped.startswith("- ") or line_stripped.startswith("* "):
                 if not in_list:
                     in_list = True
                     current_list = []
-                current_list.append(line[2:].strip())
+                # Add new list item
+                current_list.append(line_stripped[2:].strip())
+
+            # Check for list continuation (indented line while in a list)
+            elif in_list and len(original_line) > 0 and original_line[0] in (" ", "\t"):
+                # This is a continuation of the previous list item
+                if current_list:
+                    # Append to the last list item with a space separator
+                    current_list[-1] = current_list[-1] + " " + line_stripped
 
             # Regular content
             else:
@@ -136,8 +260,8 @@ class MarkdownToPowerPoint:
                     current_list = []
                     in_list = False
 
-                if not line.startswith("#") and line:
-                    slide_data["content"].append(line)
+                if not line_stripped.startswith("#") and line_stripped:
+                    slide_data["content"].append(line_stripped)
 
         # Don't forget the last list if we ended with one
         if in_list and current_list:
@@ -146,13 +270,18 @@ class MarkdownToPowerPoint:
         return slide_data
 
     def add_slide_to_presentation(
-        self, slide_data: Dict[str, Any], base_path: str = ""
+        self,
+        slide_data: Dict[str, Any],
+        base_path: str = "",
+        is_title_slide: bool = False,
     ) -> None:
         """Add a slide to the presentation based on parsed data.
 
         Creates a new slide with parsed content including title, text content,
-        bullet lists, and images. Handles background images if configured.
-        Automatically positions content vertically on the slide.
+        bullet lists, images, and speaker notes. Handles background images and
+        colors if configured. Automatically positions content vertically on the slide.
+        Uses Title Slide layout for title slides (centered title) and Title and
+        Content layout for content slides.
 
         Args:
             slide_data: Parsed slide data dictionary with keys:
@@ -160,8 +289,12 @@ class MarkdownToPowerPoint:
                 'content': Regular text content lines (List[str])
                 'lists': Bullet lists grouped (List[List[str]])
                 'images': Image references with alt text (List[Dict])
+                'speaker_notes': Speaker notes text (str, optional)
             base_path: Base directory path for resolving relative image paths.
                 Used to resolve ./image.png style references.
+            is_title_slide: If True, uses Title Slide layout (0) with centered title.
+                If False, uses Title and Content layout (1) for title/body style.
+                Defaults to False.
 
         Returns:
             None
@@ -169,6 +302,8 @@ class MarkdownToPowerPoint:
         Side Effects:
             Adds a new slide to self.presentation with all parsed content.
             Modifies presentation state by adding shapes (text boxes, images).
+            Adds speaker notes if present in slide_data.
+            Applies background and font colors if configured.
 
         Examples:
             >>> converter = MarkdownToPowerPoint()
@@ -176,15 +311,30 @@ class MarkdownToPowerPoint:
             ...     'title': 'My Slide',
             ...     'content': ['Some text'],
             ...     'lists': [['Item 1', 'Item 2']],
-            ...     'images': []
+            ...     'images': [],
+            ...     'speaker_notes': 'Remember to mention key points'
             ... }
-            >>> converter.add_slide_to_presentation(slide_data)
+            >>> converter.add_slide_to_presentation(slide_data, is_title_slide=True)
             >>> len(converter.presentation.slides) == 1
             True
         """
-        # Use blank slide layout
-        slide_layout = self.presentation.slide_layouts[6]  # Blank layout
+        # Choose layout based on slide type
+        if is_title_slide:
+            # Layout 0: Title Slide (title centered in middle)
+            slide_layout = self.presentation.slide_layouts[0]
+        else:
+            # Layout 1: Title and Content (title at top, body area below)
+            slide_layout = self.presentation.slide_layouts[1]
+
         slide = self.presentation.slides.add_slide(slide_layout)
+
+        # Apply background color based on slide type
+        bg_color = self.title_bg_color if is_title_slide else self.background_color
+        if bg_color:
+            background = slide.background
+            fill = background.fill
+            fill.solid()
+            fill.fore_color.rgb = bg_color
 
         # Add background image if specified (add it first so other content appears on top)
         if self.background_image and os.path.exists(self.background_image):
@@ -204,23 +354,31 @@ class MarkdownToPowerPoint:
         elif self.background_image:
             print(f"Warning: Background image not found: {self.background_image}")
 
-        # Track vertical position for content placement
-        top_position = Inches(0.5)
+        # Handle title based on slide type
+        title_color = self.title_font_color if is_title_slide else self.font_color
 
-        # Add title if present
-        if slide_data["title"]:
-            title_box = slide.shapes.add_textbox(
-                Inches(0.5), top_position, Inches(9), Inches(1)
-            )
-            title_frame = title_box.text_frame
-            title_frame.text = slide_data["title"]
-
-            # Format title
-            title_paragraph = title_frame.paragraphs[0]
-            title_paragraph.font.size = Pt(32)
-            title_paragraph.font.bold = True
-
-            top_position = Inches(top_position.inches + 1.2)
+        if is_title_slide:
+            # For title slides, use the built-in title placeholder (centered)
+            if slide_data["title"] and slide.shapes.title:
+                slide.shapes.title.text = slide_data["title"]
+                # Apply title font color if specified
+                if title_color:
+                    for paragraph in slide.shapes.title.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.color.rgb = title_color
+            # Title slides typically don't have body content, but track position anyway
+            top_position = Inches(4.0)
+        else:
+            # For content slides, use the title placeholder at the top
+            if slide_data["title"] and slide.shapes.title:
+                slide.shapes.title.text = slide_data["title"]
+                # Apply font color to title if specified
+                if title_color:
+                    for paragraph in slide.shapes.title.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.color.rgb = title_color
+            # Start content below the title
+            top_position = Inches(1.5)
 
         # Add regular content
         if slide_data["content"]:
@@ -234,9 +392,12 @@ class MarkdownToPowerPoint:
                 content_frame.word_wrap = True
                 content_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
 
-                # Format content
+                # Format content and apply font color
                 for paragraph in content_frame.paragraphs:
                     paragraph.font.size = Pt(18)
+                    if self.font_color:
+                        for run in paragraph.runs:
+                            run.font.color.rgb = self.font_color
 
                 top_position = Inches(top_position.inches + 2.5)
 
@@ -261,6 +422,11 @@ class MarkdownToPowerPoint:
                 p.font.size = Pt(16)
                 p.level = 0
 
+                # Apply font color to list items
+                if self.font_color:
+                    for run in p.runs:
+                        run.font.color.rgb = self.font_color
+
             top_position = Inches(top_position.inches + list_height + 0.3)
 
         # Add images
@@ -284,6 +450,12 @@ class MarkdownToPowerPoint:
                     print(f"Warning: Could not add image {image_path}: {e}")
             else:
                 print(f"Warning: Image not found: {image_path}")
+
+        # Add speaker notes if present
+        if slide_data.get("speaker_notes"):
+            notes_slide = slide.notes_slide
+            text_frame = notes_slide.notes_text_frame
+            text_frame.text = slide_data["speaker_notes"]
 
     def convert(
         self,
@@ -342,9 +514,11 @@ class MarkdownToPowerPoint:
         base_path = os.path.dirname(os.path.abspath(markdown_file))
 
         # Process each slide
-        for slide_content in slides_content:
+        for index, slide_content in enumerate(slides_content):
             slide_data = self.parse_slide_content(slide_content)
-            self.add_slide_to_presentation(slide_data, base_path)
+            # First slide starting with single # is a title slide
+            is_title_slide = index == 0 and slide_content.strip().startswith("# ")
+            self.add_slide_to_presentation(slide_data, base_path, is_title_slide)
 
         # Save presentation
         self.presentation.save(output_file)
@@ -421,6 +595,14 @@ def create_presentation(cfg: Config) -> int:
         if cfg.verbose:
             logger.info(f"Created output directory: {cfg.output_path}")
 
+    # Create output directory for explicit output file if needed (Mode 1)
+    if cfg.output_file:
+        output_dir = os.path.dirname(cfg.output_file)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir, exist_ok=True)
+            if cfg.verbose:
+                logger.info(f"Created output directory: {output_dir}")
+
     # Prepare background image (validate once for all files)
     background_image = None
     if cfg.background_path:
@@ -454,7 +636,13 @@ def create_presentation(cfg: Config) -> int:
                 logger.info(f"Converting {filename} -> {output_file}")
 
         # Create converter and process file
-        converter = MarkdownToPowerPoint(background_image)
+        converter = MarkdownToPowerPoint(
+            background_image=background_image,
+            background_color=cfg.background_color,
+            font_color=cfg.font_color,
+            title_bg_color=cfg.title_bg_color,
+            title_font_color=cfg.title_font_color,
+        )
         converter.convert(filename, output_file, background_image)
 
     return 0

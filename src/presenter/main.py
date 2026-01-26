@@ -60,6 +60,8 @@ class CmdLine(object):
                 md2ppt create testdata/content/slides.md output/presentation.pptx --verbose
                 md2ppt create slides.md presentation.pptx --background background.jpg
                 md2ppt create testdata/content/slides.md presentation.pptx -b testdata/content/background.jpg --verbose
+                md2ppt create slides.md output.pptx --background-color 1E3A8A --font-color FFFFFF
+                md2ppt create slides.md output.pptx --title-bg-color 0F172A --title-font-color F59E0B
             """,
         )
 
@@ -98,6 +100,10 @@ class CmdLine(object):
         Supported options:
             --output DIR: Output directory (Mode 3) or filename (Mode 1)
             --background FILE: Background image for all slides
+            --background-color COLOR: Background color for content slides (hex: RRGGBB or #RRGGBB)
+            --font-color COLOR: Font color for content slides (hex: RRGGBB or #RRGGBB)
+            --title-bg-color COLOR: Background color for title slide (hex: RRGGBB or #RRGGBB)
+            --title-font-color COLOR: Font color for title slide (hex: RRGGBB or #RRGGBB)
             --verbose: Enable verbose logging
             --debug: Enable debug mode
 
@@ -121,6 +127,34 @@ class CmdLine(object):
             action="store",
             default="",
             help="Path to background image file for all slides",
+        )
+        parser.add_argument(
+            "--background-color",
+            dest="background_color",
+            action="store",
+            default="",
+            help="Background color for content slides (hex format: RRGGBB or #RRGGBB)",
+        )
+        parser.add_argument(
+            "--font-color",
+            dest="font_color",
+            action="store",
+            default="",
+            help="Font color for content slides (hex format: RRGGBB or #RRGGBB)",
+        )
+        parser.add_argument(
+            "--title-bg-color",
+            dest="title_bg_color",
+            action="store",
+            default="",
+            help="Background color for title slide (hex format: RRGGBB or #RRGGBB)",
+        )
+        parser.add_argument(
+            "--title-font-color",
+            dest="title_font_color",
+            action="store",
+            default="",
+            help="Font color for title slide (hex format: RRGGBB or #RRGGBB)",
         )
         parser.add_argument(
             "--verbose",
