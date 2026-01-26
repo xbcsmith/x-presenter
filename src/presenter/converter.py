@@ -87,6 +87,198 @@ class MarkdownToPowerPoint:
             logger.warning(f"Invalid hex color: {color_str}")
             return None
 
+    def _remove_unused_placeholders(
+        self, slide, has_title: bool, has_body_content: bool
+    ) -> None:
+        """Remove unused placeholder shapes from slide.
+
+        PowerPoint layouts include placeholder shapes (title, body) that should
+        be removed if not used. This prevents empty placeholders from appearing
+        in the presentation.
+
+        Args:
+            slide: PowerPoint slide object
+            has_title: Whether slide has title content
+            has_body_content: Whether slide has body content (lists, paragraphs, images)
+
+        Returns:
+            None
+
+        Side Effects:
+            Removes unused placeholder shapes from the slide
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> # slide with no title
+            >>> converter._remove_unused_placeholders(slide, has_title=False, has_body_content=True)
+            >>> # Title placeholder removed
+        """
+        shapes_to_delete = []
+
+        for shape in slide.shapes:
+            # Check if it's a placeholder
+            if shape.is_placeholder:
+                placeholder = shape.placeholder_format
+                # Type 1 is title placeholder
+                # Type 2 is body/content placeholder
+                if placeholder.type == 1 and not has_title:  # Title placeholder unused
+                    shapes_to_delete.append(shape)
+                elif (
+                    placeholder.type == 2 and has_body_content
+                ):  # Body placeholder unused (we create our own)
+                    shapes_to_delete.append(shape)
+
+        # Remove the shapes (must be done after iteration)
+        for shape in shapes_to_delete:
+            sp = shape.element
+            sp.getparent().remove(sp)
+
+    def _parse_markdown_formatting(self, text: str) -> List[Dict[str, Any]]:
+        """Parse markdown formatting in text and return formatted segments.
+
+        Parses bold (**text**), italic (*text*), and code (`text`) formatting.
+        Returns list of text segments with their formatting attributes.
+
+        Args:
+            text: Text potentially containing markdown formatting
+
+        Returns:
+            List of dicts with 'text', 'bold', 'italic', 'code' keys
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> segments = converter._parse_markdown_formatting("**bold** text")
+            >>> len(segments)
+            2
+            >>> segments[0]['bold']
+            True
+            >>> segments[1]['bold']
+            False
+        """
+        import re
+
+        # Pattern to match **bold**, *italic*, `code`
+        # Use negative lookbehind/lookahead to avoid matching escaped characters
+        pattern = r"(\*\*.*?\*\*|\*.*?\*|`.*?`)"
+
+        segments = []
+        last_end = 0
+
+        for match in re.finditer(pattern, text):
+            # Add any plain text before this match
+            if match.start() > last_end:
+                plain_text = text[last_end : match.start()]
+                if plain_text:
+                    segments.append(
+                        {
+                            "text": plain_text,
+                            "bold": False,
+                            "italic": False,
+                            "code": False,
+                        }
+                    )
+
+            matched_text = match.group(1)
+
+            # Determine formatting type and extract inner text
+            if matched_text.startswith("**") and matched_text.endswith("**"):
+                # Bold
+                inner_text = matched_text[2:-2]
+                segments.append(
+                    {"text": inner_text, "bold": True, "italic": False, "code": False}
+                )
+            elif matched_text.startswith("*") and matched_text.endswith("*"):
+                # Italic (single asterisk)
+                inner_text = matched_text[1:-1]
+                segments.append(
+                    {"text": inner_text, "bold": False, "italic": True, "code": False}
+                )
+            elif matched_text.startswith("`") and matched_text.endswith("`"):
+                # Code (backticks)
+                inner_text = matched_text[1:-1]
+                segments.append(
+                    {"text": inner_text, "bold": False, "italic": False, "code": True}
+                )
+
+            last_end = match.end()
+
+        # Add any remaining plain text
+        if last_end < len(text):
+            remaining_text = text[last_end:]
+            if remaining_text:
+                segments.append(
+                    {
+                        "text": remaining_text,
+                        "bold": False,
+                        "italic": False,
+                        "code": False,
+                    }
+                )
+
+        # If no formatting found, return the whole text as plain
+        if not segments:
+            segments.append(
+                {"text": text, "bold": False, "italic": False, "code": False}
+            )
+
+        return segments
+
+    def _apply_text_formatting(
+        self,
+        text_frame,
+        text: str,
+        font_size: int = 18,
+        color: Optional[RGBColor] = None,
+    ) -> None:
+        """Apply markdown formatting to text in a text frame.
+
+        Parses markdown formatting and creates appropriately formatted runs.
+
+        Args:
+            text_frame: PowerPoint text frame to add formatted text to
+            text: Text with markdown formatting
+            font_size: Font size in points
+            color: Optional font color (RGBColor)
+
+        Returns:
+            None
+
+        Side Effects:
+            Adds formatted runs to the text frame
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> # text_frame would be from a PowerPoint shape
+            >>> converter._apply_text_formatting(text_frame, "**bold** text", 18)
+        """
+        segments = self._parse_markdown_formatting(text)
+        text_frame.clear()
+
+        for i, segment in enumerate(segments):
+            if i == 0:
+                # Use the first paragraph
+                p = text_frame.paragraphs[0]
+            else:
+                # Add a run to the first paragraph (don't create new paragraphs)
+                p = text_frame.paragraphs[0]
+
+            # Add the text as a run
+            run = p.add_run()
+            run.text = segment["text"]
+
+            # Apply formatting
+            if segment["bold"]:
+                run.font.bold = True
+            if segment["italic"]:
+                run.font.italic = True
+            if segment["code"]:
+                run.font.name = "Courier New"
+
+            # Apply font size and color
+            run.font.size = Pt(font_size)
+            if color:
+                run.font.color.rgb = color
+
     def parse_markdown_slides(self, markdown_content: str) -> List[str]:
         """Parse markdown content into individual slides using '---' separator.
 
@@ -144,6 +336,7 @@ class MarkdownToPowerPoint:
                 'content' (List[str]): Regular text content lines
                 'lists' (List[List[str]]): List items grouped by lists
                 'images' (List[Dict]): Image references with 'alt' and 'path'
+                'code_blocks' (List[Dict]): Code blocks with 'language' and 'code'
                 'speaker_notes' (str): Combined text from HTML comments
 
         Examples:
@@ -160,6 +353,12 @@ class MarkdownToPowerPoint:
             >>> data = converter.parse_slide_content(content_multiline)
             >>> data['lists'][0][0]
             'Item 1 continuation'
+            >>> content = "# Title\\n```python\\nprint('hello')\\n```"
+            >>> data = converter.parse_slide_content(content)
+            >>> len(data['code_blocks'])
+            1
+            >>> data['code_blocks'][0]['language']
+            'python'
         """
         # First, extract all HTML comments as speaker notes
         comment_pattern = r"<!--\s*(.*?)\s*-->"
@@ -182,11 +381,15 @@ class MarkdownToPowerPoint:
             "content": [],
             "images": [],
             "lists": [],
+            "code_blocks": [],
             "speaker_notes": "\n\n".join(speaker_notes),
         }
 
         current_list = []
         in_list = False
+        in_code_block = False
+        current_code_block = {}
+        code_block_language = ""
 
         for i, line in enumerate(lines):
             # Store original line to check for indentation
@@ -209,6 +412,34 @@ class MarkdownToPowerPoint:
                     slide_data["lists"].append(current_list)
                     current_list = []
                     in_list = False
+                continue
+
+            # Check for code block fence (``` delimiter)
+            if line_stripped.startswith("```"):
+                if not in_code_block:
+                    # Start of code block
+                    if in_list and current_list:
+                        slide_data["lists"].append(current_list)
+                        current_list = []
+                        in_list = False
+                    in_code_block = True
+                    code_block_language = line_stripped[3:].strip()
+                    current_code_block = {"language": code_block_language, "code": ""}
+                else:
+                    # End of code block
+                    slide_data["code_blocks"].append(current_code_block)
+                    current_code_block = {}
+                    code_block_language = ""
+                    in_code_block = False
+                continue
+
+            # Accumulate code lines while in a code block
+            if in_code_block:
+                # Preserve original line (don't strip) to maintain indentation
+                if current_code_block["code"]:
+                    current_code_block["code"] += "\n" + original_line
+                else:
+                    current_code_block["code"] = original_line
                 continue
 
             # Check for title (# or ##)
@@ -266,6 +497,17 @@ class MarkdownToPowerPoint:
         # Don't forget the last list if we ended with one
         if in_list and current_list:
             slide_data["lists"].append(current_list)
+
+        # Handle unclosed code blocks at end of parsing
+        if in_code_block and current_code_block:
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                "Unclosed code block detected at end of slide. "
+                "Code block will be added without closing fence."
+            )
+            slide_data["code_blocks"].append(current_code_block)
 
         return slide_data
 
@@ -360,46 +602,89 @@ class MarkdownToPowerPoint:
         if is_title_slide:
             # For title slides, use the built-in title placeholder (centered)
             if slide_data["title"] and slide.shapes.title:
-                slide.shapes.title.text = slide_data["title"]
-                # Apply title font color if specified
-                if title_color:
-                    for paragraph in slide.shapes.title.text_frame.paragraphs:
-                        for run in paragraph.runs:
-                            run.font.color.rgb = title_color
+                self._apply_text_formatting(
+                    slide.shapes.title.text_frame,
+                    slide_data["title"],
+                    font_size=32,
+                    color=title_color,
+                )
+                # Set title to bold by default
+                for paragraph in slide.shapes.title.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        if (
+                            not run.font.name == "Courier New"
+                        ):  # Don't override code font
+                            run.font.bold = True
             # Title slides typically don't have body content, but track position anyway
             top_position = Inches(4.0)
         else:
             # For content slides, use the title placeholder at the top
             if slide_data["title"] and slide.shapes.title:
-                slide.shapes.title.text = slide_data["title"]
-                # Apply font color to title if specified
-                if title_color:
-                    for paragraph in slide.shapes.title.text_frame.paragraphs:
-                        for run in paragraph.runs:
-                            run.font.color.rgb = title_color
+                self._apply_text_formatting(
+                    slide.shapes.title.text_frame,
+                    slide_data["title"],
+                    font_size=32,
+                    color=title_color,
+                )
+                # Set title to bold by default
+                for paragraph in slide.shapes.title.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        if (
+                            not run.font.name == "Courier New"
+                        ):  # Don't override code font
+                            run.font.bold = True
             # Start content below the title
             top_position = Inches(1.5)
 
         # Add regular content
         if slide_data["content"]:
-            content_text = "\n".join(slide_data["content"])
-            if content_text.strip():
-                content_box = slide.shapes.add_textbox(
-                    Inches(0.5), top_position, Inches(9), Inches(2)
-                )
-                content_frame = content_box.text_frame
-                content_frame.text = content_text
-                content_frame.word_wrap = True
-                content_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
+            content_box = slide.shapes.add_textbox(
+                Inches(0.5), top_position, Inches(9), Inches(2)
+            )
+            content_frame = content_box.text_frame
+            content_frame.word_wrap = True
+            content_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
 
-                # Format content and apply font color
-                for paragraph in content_frame.paragraphs:
-                    paragraph.font.size = Pt(18)
-                    if self.font_color:
-                        for run in paragraph.runs:
-                            run.font.color.rgb = self.font_color
+            # Process each content line with formatting
+            for i, content_line in enumerate(slide_data["content"]):
+                if content_line.strip():
+                    if i == 0:
+                        # Use existing first paragraph
+                        p = content_frame.paragraphs[0]
+                        segments = self._parse_markdown_formatting(content_line)
+                        for seg_idx, segment in enumerate(segments):
+                            if seg_idx == 0:
+                                run = p.add_run()
+                            else:
+                                run = p.add_run()
+                            run.text = segment["text"]
+                            if segment["bold"]:
+                                run.font.bold = True
+                            if segment["italic"]:
+                                run.font.italic = True
+                            if segment["code"]:
+                                run.font.name = "Courier New"
+                            run.font.size = Pt(18)
+                            if self.font_color:
+                                run.font.color.rgb = self.font_color
+                    else:
+                        # Add new paragraph for subsequent lines
+                        p = content_frame.add_paragraph()
+                        segments = self._parse_markdown_formatting(content_line)
+                        for segment in segments:
+                            run = p.add_run()
+                            run.text = segment["text"]
+                            if segment["bold"]:
+                                run.font.bold = True
+                            if segment["italic"]:
+                                run.font.italic = True
+                            if segment["code"]:
+                                run.font.name = "Courier New"
+                            run.font.size = Pt(18)
+                            if self.font_color:
+                                run.font.color.rgb = self.font_color
 
-                top_position = Inches(top_position.inches + 2.5)
+            top_position = Inches(top_position.inches + 2.5)
 
         # Add lists
         for list_items in slide_data["lists"]:
@@ -409,6 +694,7 @@ class MarkdownToPowerPoint:
             )
             list_frame = list_box.text_frame
             list_frame.clear()
+            list_frame.word_wrap = True
 
             for i, item in enumerate(list_items):
                 if i == 0:
@@ -418,14 +704,29 @@ class MarkdownToPowerPoint:
                     # Add new paragraphs for subsequent items
                     p = list_frame.add_paragraph()
 
-                p.text = f"• {item}"
-                p.font.size = Pt(16)
-                p.level = 0
-
-                # Apply font color to list items
+                # Add bullet point and then formatted text
+                bullet_run = p.add_run()
+                bullet_run.text = "• "
+                bullet_run.font.size = Pt(16)
                 if self.font_color:
-                    for run in p.runs:
+                    bullet_run.font.color.rgb = self.font_color
+
+                # Parse and apply markdown formatting to list item
+                segments = self._parse_markdown_formatting(item)
+                for segment in segments:
+                    run = p.add_run()
+                    run.text = segment["text"]
+                    if segment["bold"]:
+                        run.font.bold = True
+                    if segment["italic"]:
+                        run.font.italic = True
+                    if segment["code"]:
+                        run.font.name = "Courier New"
+                    run.font.size = Pt(16)
+                    if self.font_color:
                         run.font.color.rgb = self.font_color
+
+                p.level = 0
 
             top_position = Inches(top_position.inches + list_height + 0.3)
 
@@ -456,6 +757,15 @@ class MarkdownToPowerPoint:
             notes_slide = slide.notes_slide
             text_frame = notes_slide.notes_text_frame
             text_frame.text = slide_data["speaker_notes"]
+
+        # Remove unused placeholder shapes
+        has_title = bool(slide_data.get("title"))
+        has_body_content = bool(
+            slide_data.get("content")
+            or slide_data.get("lists")
+            or slide_data.get("images")
+        )
+        self._remove_unused_placeholders(slide, has_title, has_body_content)
 
     def convert(
         self,

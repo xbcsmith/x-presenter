@@ -209,6 +209,46 @@ This slide has title at top, content below
 - **Speaker Notes**: HTML comments `<!-- note -->` become presenter notes
 - **Layouts**: First slide with `#` gets centered Title Slide layout, all others
   get Title and Content layout
+- **Text Formatting**: Bold (`**text**`), italic (`*text*`), and inline code
+  (`` `text` ``)
+
+### Text Formatting
+
+The converter supports markdown formatting for bold, italic, and inline code:
+
+```markdown
+# Title with **Bold** and _Italic_
+
+This is **bold text** and this is _italic text_.
+
+Use `code` for inline code or technical terms.
+
+- List item with **important** text
+- Another item with `function_name()`
+- Mix **bold** and _italic_ formatting
+```
+
+Formatting features:
+
+- **Bold text**: Use `**text**` (double asterisks)
+- **Italic text**: Use `*text*` (single asterisk)
+- **Inline code**: Use `` `text` `` (backticks) - renders in monospace font
+- Works in titles, content paragraphs, and list items
+- Compatible with custom colors and all other features
+
+Example with mixed formatting:
+
+```markdown
+## **Project Status**
+
+**Completed:** Implementation is done
+_In Progress:_ Testing and documentation
+**Note:** Use `pytest --cov` for coverage
+
+- **Feature A**: Complete
+- _Feature B_: In progress
+- Run `git commit -m "message"` to save
+```
 
 ### Speaker Notes
 
