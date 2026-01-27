@@ -211,6 +211,7 @@ This slide has title at top, content below
   get Title and Content layout
 - **Text Formatting**: Bold (`**text**`), italic (`*text*`), and inline code
   (`` `text` ``)
+- **Code Blocks**: Fenced code blocks with syntax highlighting (triple backticks with language identifier)
 
 ### Text Formatting
 
@@ -298,7 +299,53 @@ Key talking points:
 
 For more details, see `docs/explanation/speaker_notes_implementation.md`.
 
+### Code Blocks
+
+Display code snippets with syntax highlighting using triple backticks:
+
+```python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+```
+
+**Features:**
+
+- Monospace font (Courier New, 12pt)
+- Light gray background for distinction
+- Syntax highlighting for 8+ languages
+- Preserved indentation and formatting
+- Automatic height sizing (min 1 inch, max 4 inches)
+
+**Supported languages:** Python, JavaScript, Java, Go, Bash, SQL, YAML, JSON
+
+**Usage:**
+
+````markdown
+```language
+code here
+```
+````
+
+````
+
+Replace `language` with the programming language identifier (e.g., `python`,
+`javascript`, `bash`, `sql`). Omit the language identifier for code without
+syntax highlighting.
+
+**Best practices:**
+
+- Keep code blocks short (10-15 lines max)
+- Use meaningful variable names
+- Add comments for clarity
+- Consider splitting long code across multiple slides
+
+For detailed guide, see `docs/how-to/using_code_blocks.md`.
+
 ### Multi-Line List Items
+</text>
+
 
 List items can span multiple lines by indenting continuation lines. This is
 useful for long bullet points that need to wrap:
@@ -310,7 +357,7 @@ useful for long bullet points that need to wrap:
   line with indentation
 - another list item that also wraps to the next line
 - short item
-```
+````
 
 The continuation lines (indented with spaces or tabs) will be combined with the
 previous bullet point into a single list item in the presentation.
