@@ -51,6 +51,17 @@ class TestParseMarkdownFormatting:
         assert segments[0]["italic"] is True
         assert segments[0]["code"] is False
 
+    def test_italic_text_underscore(self):
+        """Test italic text with underscore syntax."""
+        converter = MarkdownToPowerPoint()
+        segments = converter._parse_markdown_formatting("_italic text_")
+
+        assert len(segments) == 1
+        assert segments[0]["text"] == "italic text"
+        assert segments[0]["bold"] is False
+        assert segments[0]["italic"] is True
+        assert segments[0]["code"] is False
+
     def test_code_text(self):
         """Test code text with backticks."""
         converter = MarkdownToPowerPoint()
@@ -77,6 +88,17 @@ class TestParseMarkdownFormatting:
         """Test mixed italic and plain text."""
         converter = MarkdownToPowerPoint()
         segments = converter._parse_markdown_formatting("*italic* and plain")
+
+        assert len(segments) == 2
+        assert segments[0]["text"] == "italic"
+        assert segments[0]["italic"] is True
+        assert segments[1]["text"] == " and plain"
+        assert segments[1]["italic"] is False
+
+    def test_mixed_underscore_italic_and_plain(self):
+        """Test mixed underscore italic and plain text."""
+        converter = MarkdownToPowerPoint()
+        segments = converter._parse_markdown_formatting("_italic_ and plain")
 
         assert len(segments) == 2
         assert segments[0]["text"] == "italic"
@@ -131,6 +153,36 @@ class TestParseMarkdownFormatting:
         assert segments[0]["bold"] is True
         assert segments[2]["italic"] is True
         assert segments[4]["code"] is True
+
+    def test_asterisk_and_underscore_italic_mixed(self):
+        """Test both asterisk and underscore italic in same string."""
+        converter = MarkdownToPowerPoint()
+        segments = converter._parse_markdown_formatting("*italic1* and _italic2_")
+
+        assert len(segments) == 3
+        assert segments[0]["text"] == "italic1"
+        assert segments[0]["italic"] is True
+        assert segments[2]["text"] == "italic2"
+        assert segments[2]["italic"] is True
+
+    def test_real_world_agentic_workflow_example(self):
+        """Test real-world example from agentic workflow slides."""
+        converter = MarkdownToPowerPoint()
+        text = "Describe _what_ we are building and _why_."
+        segments = converter._parse_markdown_formatting(text)
+
+        # Should have: "Describe ", "what", " we are building and ", "why", "."
+        assert len(segments) == 5
+        assert segments[0]["text"] == "Describe "
+        assert segments[0]["italic"] is False
+        assert segments[1]["text"] == "what"
+        assert segments[1]["italic"] is True
+        assert segments[2]["text"] == " we are building and "
+        assert segments[2]["italic"] is False
+        assert segments[3]["text"] == "why"
+        assert segments[3]["italic"] is True
+        assert segments[4]["text"] == "."
+        assert segments[4]["italic"] is False
 
     def test_empty_string(self):
         """Test empty string."""

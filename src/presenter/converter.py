@@ -149,8 +149,14 @@ class MarkdownToPowerPoint:
     def _parse_markdown_formatting(self, text: str) -> List[Dict[str, Any]]:
         """Parse markdown formatting in text and return formatted segments.
 
-        Parses bold (**text**), italic (*text*), and code (`text`) formatting.
-        Returns list of text segments with their formatting attributes.
+        Parses bold (**text**), italic (*text* or _text_), and code (`text`)
+        formatting. Returns list of text segments with their formatting
+        attributes.
+
+        Supports:
+        - Bold: **text** (double asterisks)
+        - Italic: *text* (single asterisks) or _text_ (underscores)
+        - Code: `text` (backticks)
 
         Args:
             text: Text potentially containing markdown formatting
@@ -167,15 +173,20 @@ class MarkdownToPowerPoint:
             True
             >>> segments[1]['bold']
             False
+            >>> segments = converter._parse_markdown_formatting("_what_ we build")
+            >>> segments[1]['italic']
+            True
         """
         import re
 
-        # Pattern to match **bold**, *italic*, `code`
-        # Match in order: bold, code, then italic (to prevent ** being matched as italic)
+        # Pattern to match **bold**, *italic*, _italic_, `code`
+        # Match in order: bold, code, then italic (to prevent ** being matched
+        # as italic)
         # Bold: ** followed by anything (including empty) followed by **
         # Code: ` followed by anything (including empty) followed by `
-        # Italic: single * with lookahead/lookbehind to exclude doubled asterisks
-        pattern = r"(\*\*.*?\*\*|`.*?`|(?<!\*)\*(?!\*)[^*]*\*)"
+        # Italic: single * or _ with lookahead/lookbehind to exclude doubled
+        # asterisks
+        pattern = r"(\*\*.*?\*\*|`.*?`|(?<!\*)\*(?!\*)[^*]*\*|(?<!_)_(?!_)[^_]*_)"
 
         segments = []
         last_end = 0
@@ -205,6 +216,12 @@ class MarkdownToPowerPoint:
                 )
             elif matched_text.startswith("*") and matched_text.endswith("*"):
                 # Italic (single asterisk)
+                inner_text = matched_text[1:-1]
+                segments.append(
+                    {"text": inner_text, "bold": False, "italic": True, "code": False}
+                )
+            elif matched_text.startswith("_") and matched_text.endswith("_"):
+                # Italic (underscore)
                 inner_text = matched_text[1:-1]
                 segments.append(
                     {"text": inner_text, "bold": False, "italic": True, "code": False}
