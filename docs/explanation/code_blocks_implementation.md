@@ -228,21 +228,21 @@ formatting.
 **Design Principles**:
 
 1. **Semantic Clarity**: Different token types use visually distinct colors
-2. **Readability**: High contrast with light gray background
+2. **Readability**: High contrast with dark background
 3. **Consistency**: Same colors across all languages where applicable
 4. **Convention**: Matches common code editor color schemes
 5. **Accessibility**: Distinct colors help distinguish code structure
 
 **Color Choices**:
 
-| Use      | Color  | Reason                                          |
-| -------- | ------ | ----------------------------------------------- |
-| Keywords | Purple | Distinct, calls attention to control flow       |
-| Strings  | Orange | Warm color, data boundaries are important       |
-| Numbers  | Green  | Cool color, different from strings and keywords |
-| Comments | Gray   | De-emphasized, not executable                   |
-| Builtins | Blue   | Standard, familiar from many editors            |
-| Default  | Black  | High contrast on light gray background          |
+| Use      | Color      | Reason                                          |
+| -------- | ---------- | ----------------------------------------------- |
+| Keywords | Purple     | Distinct, calls attention to control flow       |
+| Strings  | Orange     | Warm color, data boundaries are important       |
+| Numbers  | Green      | Cool color, different from strings and keywords |
+| Comments | Gray       | De-emphasized, not executable                   |
+| Builtins | Blue       | Standard, familiar from many editors            |
+| Default  | Light Gray | High contrast on dark background                |
 
 ## Phase 3: Rendering
 
@@ -259,7 +259,7 @@ formatting.
    Tokenize code using `_tokenize_code(language)` f. For each token:
    - Add text run to textbox
    - Apply syntax color to run
-   - Apply Courier New 12pt font g. Apply light gray background fill h. Update
+   - Apply Courier New 12pt font g. Apply dark background fill h. Update
      position for next element
 
 ### Height Calculation
@@ -316,13 +316,13 @@ code_frame.margin_right = Inches(0.1)             # Right margin
 
 ### Background Color Configuration
 
-**Default**: Light gray `RGBColor(240, 240, 240)`
+**Default**: Dark gray `RGBColor(30, 30, 30)` with light text for high contrast
 
 **Customization**: Can be set via initialization parameter:
 
 ```python
 converter = MarkdownToPowerPoint(
-    code_background_color="E0E0E0"  # Custom light gray
+    code_background_color="1F1F1F"  # Custom dark background
 )
 ```
 

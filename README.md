@@ -313,7 +313,7 @@ def fibonacci(n):
 **Features:**
 
 - Monospace font (Courier New, 12pt)
-- Light gray background for distinction
+- Dark background with light text for high contrast
 - Syntax highlighting for 8+ languages
 - Preserved indentation and formatting
 - Automatic height sizing (min 1 inch, max 4 inches)

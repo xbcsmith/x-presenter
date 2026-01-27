@@ -12,8 +12,10 @@ from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_AUTO_SIZE
 from pptx.util import Inches, Pt
 
+from .config import Config
+
 if TYPE_CHECKING:
-    from .config import Config
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +56,8 @@ class MarkdownToPowerPoint:
         self.title_font_color = self._parse_color(title_font_color)
         self.code_background_color = self._parse_color(code_background_color)
         if self.code_background_color is None:
-            # Default light gray background for code blocks
-            self.code_background_color = RGBColor(240, 240, 240)
+            # Default dark background for code blocks with better contrast
+            self.code_background_color = RGBColor(30, 30, 30)
 
     def _parse_color(self, color_str: Optional[str]) -> Optional[RGBColor]:
         """Parse hex color string to RGBColor object.
@@ -267,7 +269,7 @@ class MarkdownToPowerPoint:
             "comment": RGBColor(106, 153, 85),  # Green
             "number": RGBColor(181, 206, 168),  # Light green
             "function": RGBColor(220, 220, 170),  # Yellow
-            "default": RGBColor(212, 212, 212),  # Light gray
+            "default": RGBColor(230, 230, 230),  # Light gray for contrast
         }
 
         # Normalize language identifier

@@ -10,7 +10,7 @@ The implementation includes:
 - Rendering code in monospace font with preserved formatting
 - Basic syntax highlighting for common programming languages
 - Fixed-height sizing with maximum height constraints
-- Light gray background for visual distinction from regular text
+- Dark background for high contrast with light text
 
 ## Current State Analysis
 
@@ -186,14 +186,14 @@ def _get_syntax_color(self, token: str, language: str) -> Optional[RGBColor]:
 - yaml
 - json
 
-**Color scheme** (VSCode-inspired):
+**Color scheme** (VSCode-inspired dark theme):
 
 - Keywords: `RGBColor(197, 134, 192)` (purple)
 - Strings: `RGBColor(206, 145, 120)` (orange)
 - Comments: `RGBColor(106, 153, 85)` (green)
 - Numbers: `RGBColor(181, 206, 168)` (light green)
 - Functions: `RGBColor(220, 220, 170)` (yellow)
-- Default: `RGBColor(212, 212, 212)` (light gray)
+- Default: `RGBColor(230, 230, 230)` (light gray for contrast on dark background)
 
 **Token classification logic**:
 
@@ -361,10 +361,10 @@ for code_block in slide_data.get("code_blocks", []):
     code_frame.margin_top = Inches(0.1)
     code_frame.margin_bottom = Inches(0.1)
 
-    # Set background color (light gray)
+    # Set background color (dark gray for high contrast)
     fill = code_box.fill
     fill.solid()
-    fill.fore_color.rgb = RGBColor(240, 240, 240)
+    fill.fore_color.rgb = RGBColor(30, 30, 30)
 
     # Add code with syntax highlighting
     tokens = self._tokenize_code(code_text, language)
@@ -390,8 +390,8 @@ for code_block in slide_data.get("code_blocks", []):
 **Background configuration**:
 
 - Use solid fill for textbox shape
-- Default color: `RGBColor(240, 240, 240)` (light gray)
-- Consider adding optional `code_background_color` parameter in future
+- Default color: `RGBColor(30, 30, 30)` (dark gray)
+- Customizable via optional `code_background_color` parameter
 
 #### 3.3 Configuration Updates
 
@@ -410,7 +410,7 @@ def __init__(
 **Parse code_background_color**:
 
 - Use same `_parse_color()` method as other colors
-- Default to `RGBColor(240, 240, 240)` if not provided
+- Default to `RGBColor(30, 30, 30)` if not provided (dark background)
 - Apply to all code blocks in presentation
 
 #### 3.4 Testing Requirements
@@ -436,7 +436,7 @@ def __init__(
 #### 3.6 Success Criteria
 
 - Code blocks render with Courier New font at 12pt
-- Light gray background applied to all code blocks
+- Dark background applied to all code blocks for high contrast
 - Syntax highlighting colors applied correctly
 - Code blocks don't overflow slides (max height enforced)
 - Proper spacing between code blocks and other elements
@@ -532,7 +532,7 @@ Display code snippets with syntax highlighting using triple backticks:
 
 Features:
 - Monospace font (Courier New, 12pt)
-- Light gray background for distinction
+- Dark background with light text for high contrast
 - Syntax highlighting for 8+ languages
 - Preserved indentation and formatting
 - Automatic height sizing (max 4 inches)
