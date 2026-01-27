@@ -923,6 +923,7 @@ class MarkdownToPowerPoint:
         slide_data = {
             "title": "",
             "content": [],
+            "content_types": [],
             "images": [],
             "lists": [],
             "code_blocks": [],
@@ -986,7 +987,7 @@ class MarkdownToPowerPoint:
                     current_code_block["code"] = original_line
                 continue
 
-            # Check for title (# or ##)
+            # Check for title (# or ##) - only first two levels are titles
             if line_stripped.startswith("# "):
                 if in_list and current_list:
                     slide_data["lists"].append(current_list)
@@ -1000,6 +1001,40 @@ class MarkdownToPowerPoint:
                     current_list = []
                     in_list = False
                 slide_data["title"] = line_stripped[3:].strip()
+
+            # Check for content headers (### and beyond) - treat as content with emphasis
+            elif line_stripped.startswith("### "):
+                if in_list and current_list:
+                    slide_data["lists"].append(current_list)
+                    current_list = []
+                    in_list = False
+                header_text = line_stripped[4:].strip()
+                slide_data["content"].append(header_text)
+                slide_data["content_types"].append("h3")
+            elif line_stripped.startswith("#### "):
+                if in_list and current_list:
+                    slide_data["lists"].append(current_list)
+                    current_list = []
+                    in_list = False
+                header_text = line_stripped[5:].strip()
+                slide_data["content"].append(header_text)
+                slide_data["content_types"].append("h4")
+            elif line_stripped.startswith("##### "):
+                if in_list and current_list:
+                    slide_data["lists"].append(current_list)
+                    current_list = []
+                    in_list = False
+                header_text = line_stripped[6:].strip()
+                slide_data["content"].append(header_text)
+                slide_data["content_types"].append("h5")
+            elif line_stripped.startswith("###### "):
+                if in_list and current_list:
+                    slide_data["lists"].append(current_list)
+                    current_list = []
+                    in_list = False
+                header_text = line_stripped[7:].strip()
+                slide_data["content"].append(header_text)
+                slide_data["content_types"].append("h6")
 
             # Check for images
             elif line_stripped.startswith("!["):
@@ -1037,6 +1072,7 @@ class MarkdownToPowerPoint:
 
                 if not line_stripped.startswith("#") and line_stripped:
                     slide_data["content"].append(line_stripped)
+                    slide_data["content_types"].append("text")
 
         # Don't forget the last list if we ended with one
         if in_list and current_list:
@@ -1180,59 +1216,77 @@ class MarkdownToPowerPoint:
             # Start content below the title
             top_position = Inches(1.5)
 
-        # Add regular content
+        # Add regular content with dynamic sizing
         if slide_data["content"]:
+            # Calculate height based on number of lines and content
+            content_item_count = len(slide_data["content"])
+            estimated_height = content_item_count * 0.35
+            estimated_height = min(estimated_height, 4.0)
+            estimated_height = max(estimated_height, 0.5)
+
             content_box = slide.shapes.add_textbox(
-                Inches(0.5), top_position, Inches(9), Inches(2)
+                Inches(0.5), top_position, Inches(9), Inches(estimated_height)
             )
             content_frame = content_box.text_frame
             content_frame.word_wrap = True
             content_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
 
-            # Process each content line with formatting
+            # Process each content line with formatting based on type
             for i, content_line in enumerate(slide_data["content"]):
                 if content_line.strip():
+                    # Get content type (defaults to "text" for backward compatibility)
+                    content_type = (
+                        slide_data["content_types"][i]
+                        if i < len(slide_data["content_types"])
+                        else "text"
+                    )
+
                     if i == 0:
-                        # Use existing first paragraph
                         p = content_frame.paragraphs[0]
-                        segments = self._parse_markdown_formatting(content_line)
-                        for seg_idx, segment in enumerate(segments):
-                            if seg_idx == 0:
-                                run = p.add_run()
-                            else:
-                                run = p.add_run()
-                            run.text = segment["text"]
-                            if segment["bold"]:
-                                run.font.bold = True
-                            if segment["italic"]:
-                                run.font.italic = True
-                            if segment["code"]:
-                                run.font.name = "Courier New"
-                            run.font.size = Pt(18)
-                            if self.font_color:
-                                run.font.color.rgb = self.font_color
                     else:
-                        # Add new paragraph for subsequent lines
                         p = content_frame.add_paragraph()
-                        segments = self._parse_markdown_formatting(content_line)
-                        for segment in segments:
-                            run = p.add_run()
-                            run.text = segment["text"]
-                            if segment["bold"]:
-                                run.font.bold = True
-                            if segment["italic"]:
-                                run.font.italic = True
-                            if segment["code"]:
-                                run.font.name = "Courier New"
+
+                    # Set spacing based on type
+                    if content_type.startswith("h"):
+                        p.space_before = Pt(6)
+                        p.space_after = Pt(3)
+                    else:
+                        p.space_before = Pt(3)
+                        p.space_after = Pt(3)
+
+                    # Apply formatting based on content type
+                    segments = self._parse_markdown_formatting(content_line)
+                    for segment in segments:
+                        run = p.add_run()
+                        run.text = segment["text"]
+                        if segment["bold"]:
+                            run.font.bold = True
+                        if segment["italic"]:
+                            run.font.italic = True
+                        if segment["code"]:
+                            run.font.name = "Courier New"
+
+                        # Set font size based on content type
+                        if content_type == "h3":
+                            run.font.size = Pt(22)
+                            run.font.bold = True
+                        elif content_type == "h4":
+                            run.font.size = Pt(20)
+                            run.font.bold = True
+                        elif content_type in ["h5", "h6"]:
                             run.font.size = Pt(18)
-                            if self.font_color:
-                                run.font.color.rgb = self.font_color
+                            run.font.bold = True
+                        else:
+                            run.font.size = Pt(16)
 
-            top_position = Inches(top_position.inches + 2.5)
+                        if self.font_color:
+                            run.font.color.rgb = self.font_color
 
-        # Add lists
+            top_position = Inches(top_position.inches + estimated_height + 0.2)
+
+        # Add lists with optimized spacing
         for list_items in slide_data["lists"]:
-            list_height = len(list_items) * 0.4
+            list_height = max(len(list_items) * 0.35, 0.5)
             list_box = slide.shapes.add_textbox(
                 Inches(1), top_position, Inches(8), Inches(list_height)
             )
@@ -1242,11 +1296,13 @@ class MarkdownToPowerPoint:
 
             for i, item in enumerate(list_items):
                 if i == 0:
-                    # First item uses the existing paragraph
                     p = list_frame.paragraphs[0]
                 else:
-                    # Add new paragraphs for subsequent items
                     p = list_frame.add_paragraph()
+
+                # Reduce spacing between list items
+                p.space_before = Pt(0)
+                p.space_after = Pt(3)
 
                 # Add bullet point and then formatted text
                 bullet_run = p.add_run()
@@ -1266,13 +1322,11 @@ class MarkdownToPowerPoint:
                         run.font.italic = True
                     if segment["code"]:
                         run.font.name = "Courier New"
-                    run.font.size = Pt(16)
+                    run.font.size = Pt(14)
                     if self.font_color:
                         run.font.color.rgb = self.font_color
 
-                p.level = 0
-
-            top_position = Inches(top_position.inches + list_height + 0.3)
+            top_position = Inches(top_position.inches + list_height + 0.15)
 
         # Add code blocks
         for code_block in slide_data.get("code_blocks", []):
@@ -1324,7 +1378,7 @@ class MarkdownToPowerPoint:
                         run.font.color.rgb = token["color"]
 
             # Update position
-            top_position = Inches(top_position.inches + block_height + 0.3)
+            top_position = Inches(top_position.inches + block_height + 0.15)
 
         # Add images
         for image_info in slide_data["images"]:
