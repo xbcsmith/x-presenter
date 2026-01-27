@@ -17,6 +17,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Code block rendering constants
+CODE_BLOCK_MIN_HEIGHT = 1.0  # inches
+CODE_BLOCK_MAX_HEIGHT = 4.0  # inches
+CODE_BLOCK_LINE_HEIGHT = 0.25  # inches per line
+
 
 class MarkdownToPowerPoint:
     """Convert Markdown presentations to PowerPoint format."""
@@ -28,6 +33,7 @@ class MarkdownToPowerPoint:
         font_color: Optional[str] = None,
         title_bg_color: Optional[str] = None,
         title_font_color: Optional[str] = None,
+        code_background_color: Optional[str] = None,
     ):
         """Initialize the converter.
 
@@ -37,6 +43,7 @@ class MarkdownToPowerPoint:
             font_color: Font color for content slides (hex: RRGGBB or #RRGGBB)
             title_bg_color: Background color for title slide (hex: RRGGBB or #RRGGBB)
             title_font_color: Font color for title slide (hex: RRGGBB or #RRGGBB)
+            code_background_color: Background color for code blocks (hex: RRGGBB or #RRGGBB)
         """
         self.presentation = Presentation()
         self.slide_separator = "---"
@@ -45,6 +52,10 @@ class MarkdownToPowerPoint:
         self.font_color = self._parse_color(font_color)
         self.title_bg_color = self._parse_color(title_bg_color)
         self.title_font_color = self._parse_color(title_font_color)
+        self.code_background_color = self._parse_color(code_background_color)
+        if self.code_background_color is None:
+            # Default light gray background for code blocks
+            self.code_background_color = RGBColor(240, 240, 240)
 
     def _parse_color(self, color_str: Optional[str]) -> Optional[RGBColor]:
         """Parse hex color string to RGBColor object.
@@ -714,6 +725,43 @@ class MarkdownToPowerPoint:
 
         return tokens
 
+    def _calculate_code_block_height(self, code: str) -> float:
+        """Calculate height in inches for code block.
+
+        Calculates the appropriate height for rendering a code block based on
+        the number of lines, with minimum and maximum bounds to ensure proper
+        display without overflow.
+
+        Args:
+            code: Code text to measure
+
+        Returns:
+            Height in inches, capped at maximum and minimum bounds
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> height = converter._calculate_code_block_height("x = 1")
+            >>> height >= CODE_BLOCK_MIN_HEIGHT
+            True
+            >>> height <= CODE_BLOCK_MAX_HEIGHT
+            True
+            >>> multi_line = "\\n".join(["line"] * 20)
+            >>> height = converter._calculate_code_block_height(multi_line)
+            >>> height == CODE_BLOCK_MAX_HEIGHT
+            True
+        """
+        # Count lines in code
+        line_count = len(code.split("\n"))
+
+        # Base calculation: height per line at 12pt font
+        height = line_count * CODE_BLOCK_LINE_HEIGHT
+
+        # Apply minimum and maximum bounds
+        height = max(height, CODE_BLOCK_MIN_HEIGHT)
+        height = min(height, CODE_BLOCK_MAX_HEIGHT)
+
+        return height
+
     def _apply_text_formatting(
         self,
         text_frame,
@@ -1221,6 +1269,58 @@ class MarkdownToPowerPoint:
 
             top_position = Inches(top_position.inches + list_height + 0.3)
 
+        # Add code blocks
+        for code_block in slide_data.get("code_blocks", []):
+            code_text = code_block["code"]
+            language = code_block["language"]
+
+            # Calculate height
+            block_height = self._calculate_code_block_height(code_text)
+
+            # Create textbox for code
+            code_box = slide.shapes.add_textbox(
+                Inches(0.5),  # Left margin
+                top_position,
+                Inches(9),  # Width
+                Inches(block_height),
+            )
+
+            # Configure text frame
+            code_frame = code_box.text_frame
+            code_frame.word_wrap = True
+            code_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+            code_frame.margin_left = Inches(0.1)
+            code_frame.margin_right = Inches(0.1)
+            code_frame.margin_top = Inches(0.1)
+            code_frame.margin_bottom = Inches(0.1)
+
+            # Set background color (light gray or configured color)
+            fill = code_box.fill
+            fill.solid()
+            fill.fore_color.rgb = self.code_background_color
+
+            # Add code with syntax highlighting
+            tokens = self._tokenize_code(code_text, language)
+
+            # First token goes in existing paragraph
+            p = code_frame.paragraphs[0]
+
+            for token in tokens:
+                if token["text"] == "\n":
+                    # New paragraph for line breaks
+                    p = code_frame.add_paragraph()
+                else:
+                    # Add run to current paragraph
+                    run = p.add_run()
+                    run.text = token["text"]
+                    run.font.name = "Courier New"
+                    run.font.size = Pt(12)
+                    if token.get("color"):
+                        run.font.color.rgb = token["color"]
+
+            # Update position
+            top_position = Inches(top_position.inches + block_height + 0.3)
+
         # Add images
         for image_info in slide_data["images"]:
             image_path = image_info["path"]
@@ -1255,6 +1355,7 @@ class MarkdownToPowerPoint:
             slide_data.get("content")
             or slide_data.get("lists")
             or slide_data.get("images")
+            or slide_data.get("code_blocks")
         )
         self._remove_unused_placeholders(slide, has_title, has_body_content)
 
