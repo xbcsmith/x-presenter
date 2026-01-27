@@ -146,6 +146,40 @@ class MarkdownToPowerPoint:
             sp = shape.element
             sp.getparent().remove(sp)
 
+    def _is_list_item(self, text: str) -> bool:
+        """Check if text is a list item (ordered or unordered).
+
+        Recognizes both:
+        - Unordered lists: "- item" or "* item"
+        - Ordered lists: "1. item", "2. item", etc.
+
+        Args:
+            text: Text to check (should be stripped)
+
+        Returns:
+            True if text is a list item, False otherwise
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> converter._is_list_item("- item")
+            True
+            >>> converter._is_list_item("* item")
+            True
+            >>> converter._is_list_item("1. item")
+            True
+            >>> converter._is_list_item("regular text")
+            False
+        """
+        # Check unordered list (- or *)
+        if text.startswith("- ") or text.startswith("* "):
+            return True
+
+        # Check ordered list (1. 2. 3. etc)
+        if re.match(r"^\d+\.\s+", text):
+            return True
+
+        return False
+
     def _parse_markdown_formatting(self, text: str) -> List[Dict[str, Any]]:
         """Parse markdown formatting in text and return formatted segments.
 
@@ -177,8 +211,6 @@ class MarkdownToPowerPoint:
             >>> segments[1]['italic']
             True
         """
-        import re
-
         # Pattern to match **bold**, *italic*, _italic_, `code`
         # Match in order: bold, code, then italic (to prevent ** being matched
         # as italic)
@@ -950,6 +982,7 @@ class MarkdownToPowerPoint:
         in_code_block = False
         current_code_block = {}
         code_block_language = ""
+        current_paragraph = []  # Accumulate consecutive lines into paragraphs
 
         for i, line in enumerate(lines):
             # Store original line to check for indentation
@@ -958,12 +991,24 @@ class MarkdownToPowerPoint:
 
             # Skip empty lines, but be smart about lists
             if not line_stripped:
+                # Flush current paragraph when blank line is encountered
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 # Check if the next non-empty line is a list item
                 next_is_list = False
                 for j in range(i + 1, len(lines)):
                     next_line = lines[j].strip()
                     if next_line:
-                        if next_line.startswith("- ") or next_line.startswith("* "):
+                        if self._is_list_item(next_line):
                             next_is_list = True
                         break
 
@@ -976,6 +1021,18 @@ class MarkdownToPowerPoint:
 
             # Check for code block fence (``` delimiter)
             if line_stripped.startswith("```"):
+                # Flush current paragraph before code block
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if not in_code_block:
                     # Start of code block
                     if in_list and current_list:
@@ -1006,6 +1063,18 @@ class MarkdownToPowerPoint:
 
             # Check for title (# or ##) - only first two levels are titles
             if line_stripped.startswith("# "):
+                # Flush current paragraph before title
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if in_list and current_list:
                     slide_data["body"].append({"type": "list", "items": current_list})
                     current_list = []
@@ -1013,6 +1082,18 @@ class MarkdownToPowerPoint:
                 slide_data["title"] = line_stripped[2:].strip()
 
             elif line_stripped.startswith("## "):
+                # Flush current paragraph before title
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if in_list and current_list:
                     slide_data["body"].append({"type": "list", "items": current_list})
                     current_list = []
@@ -1021,6 +1102,18 @@ class MarkdownToPowerPoint:
 
             # Check for content headers (### and beyond) - treat as content with emphasis
             elif line_stripped.startswith("### "):
+                # Flush current paragraph before header
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if in_list and current_list:
                     slide_data["body"].append({"type": "list", "items": current_list})
                     current_list = []
@@ -1035,6 +1128,18 @@ class MarkdownToPowerPoint:
                     # No title yet, use this as title (recover from malformed hierarchy)
                     slide_data["title"] = header_text
             elif line_stripped.startswith("#### "):
+                # Flush current paragraph before header
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if in_list and current_list:
                     slide_data["body"].append({"type": "list", "items": current_list})
                     current_list = []
@@ -1049,6 +1154,18 @@ class MarkdownToPowerPoint:
                     # No title yet, use this as title
                     slide_data["title"] = header_text
             elif line_stripped.startswith("##### "):
+                # Flush current paragraph before header
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if in_list and current_list:
                     slide_data["body"].append({"type": "list", "items": current_list})
                     current_list = []
@@ -1063,6 +1180,18 @@ class MarkdownToPowerPoint:
                     # No title yet, use this as title
                     slide_data["title"] = header_text
             elif line_stripped.startswith("###### "):
+                # Flush current paragraph before header
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if in_list and current_list:
                     slide_data["body"].append({"type": "list", "items": current_list})
                     current_list = []
@@ -1079,6 +1208,18 @@ class MarkdownToPowerPoint:
 
             # Check for images
             elif line_stripped.startswith("!["):
+                # Flush current paragraph before image
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if in_list and current_list:
                     slide_data["body"].append({"type": "list", "items": current_list})
                     current_list = []
@@ -1089,13 +1230,38 @@ class MarkdownToPowerPoint:
                     image_path = image_match.group(2)
                     slide_data["images"].append({"alt": alt_text, "path": image_path})
 
-            # Check for list items (new bullet point)
-            elif line_stripped.startswith("- ") or line_stripped.startswith("* "):
+            # Check for list items (unordered or ordered)
+            elif self._is_list_item(line_stripped):
+                # Flush current paragraph before list
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
                 if not in_list:
                     in_list = True
                     current_list = []
-                # Add new list item
-                current_list.append(line_stripped[2:].strip())
+
+                # Extract list item text (remove bullet or number prefix)
+                # Try ordered list pattern first (1. 2. 3. etc)
+                ordered_match = re.match(r"^\d+\.\s+(.*)", line_stripped)
+                if ordered_match:
+                    item_text = ordered_match.group(1)
+                # Try unordered list patterns (- or *)
+                elif line_stripped.startswith("- "):
+                    item_text = line_stripped[2:].strip()
+                elif line_stripped.startswith("* "):
+                    item_text = line_stripped[2:].strip()
+                else:
+                    item_text = line_stripped
+
+                current_list.append(item_text)
 
             # Check for list continuation (indented line while in a list)
             elif in_list and len(original_line) > 0 and original_line[0] in (" ", "\t"):
@@ -1112,13 +1278,20 @@ class MarkdownToPowerPoint:
                     in_list = False
 
                 if not line_stripped.startswith("#") and line_stripped:
-                    slide_data["body"].append(
-                        {
-                            "type": "content",
-                            "text": line_stripped,
-                            "content_type": "text",
-                        }
-                    )
+                    # Accumulate line into current paragraph
+                    current_paragraph.append(line_stripped)
+
+        # Flush any remaining paragraph
+        if current_paragraph:
+            paragraph_text = " ".join(current_paragraph)
+            slide_data["body"].append(
+                {
+                    "type": "content",
+                    "text": paragraph_text,
+                    "content_type": "text",
+                }
+            )
+            current_paragraph = []
 
         # Don't forget the last list if we ended with one
         if in_list and current_list:
