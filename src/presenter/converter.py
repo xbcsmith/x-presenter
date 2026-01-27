@@ -169,8 +169,11 @@ class MarkdownToPowerPoint:
         import re
 
         # Pattern to match **bold**, *italic*, `code`
-        # Use negative lookbehind/lookahead to avoid matching escaped characters
-        pattern = r"(\*\*.*?\*\*|\*.*?\*|`.*?`)"
+        # Match in order: bold, code, then italic (to prevent ** being matched as italic)
+        # Bold: ** followed by anything (including empty) followed by **
+        # Code: ` followed by anything (including empty) followed by `
+        # Italic: single * with lookahead/lookbehind to exclude doubled asterisks
+        pattern = r"(\*\*.*?\*\*|`.*?`|(?<!\*)\*(?!\*)[^*]*\*)"
 
         segments = []
         last_end = 0
