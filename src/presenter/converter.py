@@ -24,6 +24,16 @@ CODE_BLOCK_MIN_HEIGHT = 1.0  # inches
 CODE_BLOCK_MAX_HEIGHT = 4.0  # inches
 CODE_BLOCK_LINE_HEIGHT = 0.25  # inches per line
 
+# Table rendering constants (Phase 2)
+TABLE_MAX_WIDTH = 9.0  # inches (content area width used for tables)
+TABLE_ROW_HEIGHT = 0.35  # inches per row (approx)
+TABLE_HEADER_HEIGHT = 0.4  # inches for header row
+TABLE_CELL_PADDING = 0.05  # inches padding inside each cell (applied visually)
+TABLE_HEADER_FONT_SIZE = 12
+TABLE_CELL_FONT_SIZE = 12
+TABLE_HEADER_BG = RGBColor(50, 50, 50)  # default header background (dark)
+TABLE_BORDER_COLOR = RGBColor(200, 200, 200)  # table border / rule color
+
 
 class MarkdownToPowerPoint:
     """Convert Markdown presentations to PowerPoint format."""
@@ -524,6 +534,107 @@ class MarkdownToPowerPoint:
             )
 
         return segments
+
+    # -----------------------
+    # Table rendering helpers (Phase 2)
+    # -----------------------
+    def _calculate_table_dimensions(
+        self, table_struct: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Calculate simple table dimensions: number of rows, cols, total width and height.
+
+        This method returns a small dictionary containing:
+            - rows: total rows including header (int)
+            - cols: number of columns (int)
+            - total_width: inches (float)
+            - row_heights: list of row heights in inches (List[float])
+        """
+        has_header = table_struct.get("has_header", False)
+        headers = table_struct.get("headers", [])
+        rows = table_struct.get("rows", [])
+        alignments = table_struct.get("alignments", [])
+
+        cols = (
+            len(alignments)
+            if alignments
+            else (len(headers) if headers else (len(rows[0]) if rows else 1))
+        )
+        rows_count = len(rows) + (1 if has_header and headers else 0)
+        # Build row heights
+        row_heights = []
+        if has_header and headers:
+            row_heights.append(TABLE_HEADER_HEIGHT)
+        for _ in rows:
+            row_heights.append(TABLE_ROW_HEIGHT)
+        total_height = sum(row_heights) if row_heights else TABLE_ROW_HEIGHT
+        return {
+            "rows": max(rows_count, 1),
+            "cols": max(cols, 1),
+            "total_width": TABLE_MAX_WIDTH,
+            "row_heights": row_heights,
+            "total_height": total_height,
+        }
+
+    def _render_table(self, slide, top_position, table_struct: Dict[str, Any]) -> float:
+        """Render a table on the provided slide at the given top_position.
+
+        Returns the rendered height in inches (float) so callers can advance layout.
+        """
+        dims = self._calculate_table_dimensions(table_struct)
+        rows = dims["rows"]
+        cols = dims["cols"]
+        total_width = dims["total_width"]
+        total_height = dims["total_height"]
+
+        left = Inches(0.5)
+        top = top_position
+        try:
+            tbl_shape = slide.shapes.add_table(
+                rows, cols, left, top, Inches(total_width), Inches(total_height)
+            )
+            tbl = tbl_shape.table
+        except Exception:
+            # Could not create a table; fallback to textual representation height
+            fallback_height = max(rows * 0.25, 0.5)
+            return fallback_height
+
+        # Set column widths evenly
+        col_width = total_width / cols
+        for c in range(cols):
+            tbl.columns[c].width = Inches(col_width)
+
+        # Populate header if present
+        header_offset = 0
+        if table_struct.get("has_header") and table_struct.get("headers"):
+            headers = table_struct["headers"]
+            for c in range(cols):
+                cell = tbl.cell(0, c)
+                cell.text_frame.clear()
+                p = cell.text_frame.paragraphs[0]
+                run = p.add_run()
+                run.text = headers[c] if c < len(headers) else ""
+                run.font.name = "Courier New"
+                run.font.size = Pt(TABLE_HEADER_FONT_SIZE)
+                # Apply header bg color if possible
+                try:
+                    cell.fill.solid()
+                    cell.fill.fore_color.rgb = TABLE_HEADER_BG
+                except Exception:
+                    pass
+            header_offset = 1
+
+        # Populate data rows
+        for r_idx, row in enumerate(table_struct.get("rows", [])):
+            for c in range(cols):
+                cell = tbl.cell(r_idx + header_offset, c)
+                cell.text_frame.clear()
+                p = cell.text_frame.paragraphs[0]
+                run = p.add_run()
+                run.text = row[c] if c < len(row) else ""
+                run.font.name = "Courier New"
+                run.font.size = Pt(TABLE_CELL_FONT_SIZE)
+
+        return total_height
 
     def _get_syntax_color(self, token: str, language: str) -> Optional[RGBColor]:
         """Return color for syntax token based on language.
@@ -1855,6 +1966,23 @@ class MarkdownToPowerPoint:
 
                     top_position = Inches(top_position.inches + list_height + 0.15)
 
+                elif body_item["type"] == "table":
+                    # Render table using the Phase 2 renderer which creates a native pptx table.
+                    table = body_item["table"]
+                    try:
+                        rendered_height = self._render_table(slide, top_position, table)
+                    except Exception:
+                        # If rendering fails for any reason, fallback to a textual rendering height.
+                        rendered_height = max(
+                            (
+                                len(table.get("rows", []))
+                                + (1 if table.get("has_header") else 0)
+                            )
+                            * 0.25,
+                            0.5,
+                        )
+                    top_position = Inches(top_position.inches + rendered_height + 0.15)
+
         # Backward compatibility: render old-style content and lists if body is empty
         elif slide_data.get("content"):
             # Calculate height based on number of lines and content
@@ -2077,11 +2205,13 @@ class MarkdownToPowerPoint:
 
         # Remove unused placeholder shapes
         has_title = bool(slide_data.get("title"))
+        # Include tables discovered in the new 'body' field as body content to ensure placeholders are cleaned appropriately
         has_body_content = bool(
             slide_data.get("content")
             or slide_data.get("lists")
             or slide_data.get("images")
             or slide_data.get("code_blocks")
+            or any(item.get("type") == "table" for item in slide_data.get("body", []))
         )
         self._remove_unused_placeholders(slide, has_title, has_body_content)
 
