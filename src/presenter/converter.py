@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from pptx import Presentation
 from pptx.dml.color import RGBColor
-from pptx.enum.text import MSO_AUTO_SIZE
+from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE
 from pptx.util import Inches, Pt
 
 from .config import Config
@@ -179,6 +179,243 @@ class MarkdownToPowerPoint:
             return True
 
         return False
+
+    # -----------------------
+    # Table detection & parsing helpers (Phase 1)
+    # -----------------------
+    class TableParseError(Exception):
+        """Raised when a markdown table cannot be parsed into a valid structure."""
+
+        pass
+
+    def _is_table_row(self, line: str) -> bool:
+        """Check if line is a Markdown table row.
+
+        A valid table row must:
+        - Contain at least one pipe character OR have multiple cells separated by pipes
+        - Contain non-whitespace content besides pipes
+        - Not be just pipes composed solely of whitespace/dashes (separator)
+
+        Args:
+            line: Stripped line to check
+
+        Returns:
+            True if line is a table row, False otherwise
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> converter._is_table_row("| A | B |")
+            True
+            >>> converter._is_table_row("A | B | C")
+            True
+            >>> converter._is_table_row("|||")
+            False
+        """
+        if not line:
+            return False
+
+        if "|" not in line:
+            return False
+
+        # Split into cells and check for meaningful content
+        cells = [c.strip() for c in line.split("|")]
+        # Remove empty leading/trailing cells caused by outer pipes
+        if cells and cells[0] == "":
+            cells = cells[1:]
+        if cells and cells[-1] == "":
+            cells = cells[:-1]
+
+        # Need at least two cells to consider it a table row
+        if len(cells) < 2:
+            return False
+
+        # If every cell is empty or consists only of dashes/colons, treat as not a content row
+        has_meaning = any(
+            re.search(r"\S", c) and not re.fullmatch(r"[:\- ]+", c) for c in cells
+        )
+        return bool(has_meaning)
+
+    def _is_table_separator(self, line: str) -> bool:
+        """Check if line is a table separator row.
+
+        Separator row examples:
+            |---|---|
+            |:---|:---:|---:|
+            ---|---|---
+
+        Accepts optional leading/trailing pipes and spaces.
+
+        Args:
+            line: Stripped line to check
+
+        Returns:
+            True if line is a table separator, False otherwise
+        """
+        if not line:
+            return False
+
+        # Remove leading/trailing pipes temporarily
+        tmp = line.strip()
+        if tmp.startswith("|"):
+            tmp = tmp[1:]
+        if tmp.endswith("|"):
+            tmp = tmp[:-1]
+
+        parts = [p.strip() for p in tmp.split("|")]
+        if len(parts) < 1:
+            return False
+
+        # A valid separator cell must contain at least three dashes with optional surrounding colons
+        for part in parts:
+            if not re.fullmatch(r":?-{3,}:?", part):
+                return False
+
+        return True
+
+    def _parse_table_alignment(self, separator: str) -> List[str]:
+        """Parse column alignments from separator row.
+
+        Alignment rules (per GitHub-flavored Markdown):
+        - :--- or --- → "left"
+        - :---: → "center"
+        - ---: → "right"
+
+        Args:
+            separator: Table separator row (string potentially containing pipes)
+
+        Returns:
+            List[str]: Alignment per column, values are "left"|"center"|"right"
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> converter._parse_table_alignment("|:---|:---:|---:|")
+            ['left', 'center', 'right']
+        """
+        # Normalize by removing outer pipes and splitting
+        row = separator.strip()
+        if row.startswith("|"):
+            row = row[1:]
+        if row.endswith("|"):
+            row = row[:-1]
+
+        parts = [p.strip() for p in row.split("|")]
+        alignments = []
+        for part in parts:
+            if part.startswith(":") and part.endswith(":"):
+                alignments.append("center")
+            elif part.endswith(":"):
+                alignments.append("right")
+            else:
+                alignments.append("left")
+
+        return alignments
+
+    def _parse_table_row(self, line: str) -> List[str]:
+        """Parse a table row into individual cells.
+
+        Splits by pipe delimiter, trims whitespace from each cell.
+        Handles optional leading/trailing pipes.
+
+        Args:
+            line: Table row line
+
+        Returns:
+            List of cell contents (strings)
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> converter._parse_table_row("| A | B | C |")
+            ['A', 'B', 'C']
+        """
+        row = line.strip()
+        if row.startswith("|"):
+            row = row[1:]
+        if row.endswith("|"):
+            row = row[:-1]
+        cells = [c.strip() for c in row.split("|")]
+        return cells
+
+    def _parse_table(self, table_lines: List[str]) -> Dict[str, Any]:
+        """Parse accumulated table lines into structured data.
+
+        Detects separator row, extracts headers (if present), parses data rows,
+        and determines column alignments.
+
+        Args:
+            table_lines: List of table row lines (including separator)
+
+        Returns:
+            Dictionary with table structure:
+                {
+                    "has_header": bool,
+                    "headers": List[str],
+                    "rows": List[List[str]],
+                    "alignments": List[str],
+                    "raw": List[str]
+                }
+
+        Raises:
+            TableParseError: If table structure is invalid
+
+        Examples:
+            >>> converter = MarkdownToPowerPoint()
+            >>> lines = ["| A | B |", "|---|---|", "| 1 | 2 |"]
+            >>> result = converter._parse_table(lines)
+            >>> result["has_header"]
+            True
+        """
+        if not table_lines:
+            raise self.TableParseError("Empty table lines")
+
+        separator_idx = None
+        for i, line in enumerate(table_lines):
+            if self._is_table_separator(line.strip()):
+                separator_idx = i
+                break
+
+        if separator_idx is None:
+            # No explicit separator found — cannot reliably parse
+            raise self.TableParseError("Table separator row not found")
+
+        # Headers are lines before separator; treat first header line as header row if present
+        has_header = separator_idx >= 1
+        headers = []
+        if has_header:
+            headers = self._parse_table_row(table_lines[separator_idx - 1])
+
+        # Parse alignments from separator row
+        alignments = self._parse_table_alignment(table_lines[separator_idx])
+
+        # Parse data rows (lines after separator)
+        data_rows = []
+        for after in table_lines[separator_idx + 1 :]:
+            if after.strip() == "":
+                continue
+            if not self._is_table_row(after.strip()):
+                # Stop parsing table on encountering a non-table line
+                break
+            row_cells = self._parse_table_row(after)
+            # Ensure row has same number of columns as alignment spec; pad if necessary
+            if len(row_cells) < len(alignments):
+                row_cells += [""] * (len(alignments) - len(row_cells))
+            elif len(row_cells) > len(alignments):
+                # If there are more cells than alignments, extend alignments with 'left'
+                alignments += ["left"] * (len(row_cells) - len(alignments))
+            data_rows.append(row_cells)
+
+        # If headers exist but header cell count differs from alignments, normalize
+        if has_header and len(headers) < len(alignments):
+            headers += [""] * (len(alignments) - len(headers))
+        elif has_header and len(headers) > len(alignments):
+            alignments += ["left"] * (len(headers) - len(alignments))
+
+        return {
+            "has_header": has_header,
+            "headers": headers,
+            "rows": data_rows,
+            "alignments": alignments,
+            "raw": table_lines,
+        }
 
     def _parse_markdown_formatting(self, text: str) -> List[Dict[str, Any]]:
         """Parse markdown formatting in text and return formatted segments.
@@ -1019,6 +1256,57 @@ class MarkdownToPowerPoint:
                     in_list = False
                 continue
 
+            # Table detection: if this line looks like a table row or a separator, accumulate and parse the table.
+            if self._is_table_row(line_stripped) or self._is_table_separator(
+                line_stripped
+            ):
+                # Flush current paragraph before table
+                if current_paragraph:
+                    paragraph_text = " ".join(current_paragraph)
+                    slide_data["body"].append(
+                        {
+                            "type": "content",
+                            "text": paragraph_text,
+                            "content_type": "text",
+                        }
+                    )
+                    current_paragraph = []
+
+                # If we're in a list, close it before the table
+                if in_list and current_list:
+                    slide_data["body"].append({"type": "list", "items": current_list})
+                    current_list = []
+                    in_list = False
+
+                # Collect contiguous table lines (rows and separators)
+                table_lines = [original_line]
+                for j in range(i + 1, len(lines)):
+                    next_line = lines[j]
+                    next_stripped = next_line.strip()
+                    if self._is_table_row(next_stripped) or self._is_table_separator(
+                        next_stripped
+                    ):
+                        table_lines.append(next_line)
+                    else:
+                        break
+
+                # Attempt to parse the table; on failure, fall back to treating lines as normal content
+                try:
+                    parsed_table = self._parse_table(table_lines)
+                    slide_data["body"].append({"type": "table", "table": parsed_table})
+                    # Mark consumed lines as emptied so outer loop will skip them
+                    for k in range(i, i + len(table_lines)):
+                        lines[k] = ""
+                except self.TableParseError:
+                    # Fallback: append the raw lines back into paragraph accumulation for conventional processing
+                    for tl in table_lines:
+                        if tl.strip():
+                            current_paragraph.append(tl.strip())
+                    # Mark consumed lines as emptied to avoid infinite loop
+                    for k in range(i, i + len(table_lines)):
+                        lines[k] = ""
+                continue
+
             # Check for code block fence (``` delimiter)
             if line_stripped.startswith("```"):
                 # Flush current paragraph before code block
@@ -1684,8 +1972,15 @@ class MarkdownToPowerPoint:
             code_text = code_block["code"]
             language = code_block["language"]
 
-            # Calculate height
+            # Calculate height (line-based) and add small padding so text doesn't touch edges.
+            # _calculate_code_block_height already enforces min/max; add padding and re-apply bounds.
             block_height = self._calculate_code_block_height(code_text)
+            padding = 0.2  # inches total (0.1 top + 0.1 bottom)
+            # Ensure padding doesn't push us past the configured limits
+            block_height = min(
+                max(block_height + padding, CODE_BLOCK_MIN_HEIGHT),
+                CODE_BLOCK_MAX_HEIGHT,
+            )
 
             # Create textbox for code
             code_box = slide.shapes.add_textbox(
@@ -1697,8 +1992,15 @@ class MarkdownToPowerPoint:
 
             # Configure text frame
             code_frame = code_box.text_frame
-            code_frame.word_wrap = True
-            code_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+            # For code blocks we want fixed shape height (calculated above) and preserved line breaks.
+            # Disable auto-resizing so the shape height remains the expected block_height.
+            # Also disable word wrap to preserve indentation and long lines; rely on horizontal scrolling
+            # or clipping rather than undesired wrapping which can change layout unpredictably.
+            code_frame.word_wrap = False
+            code_frame.auto_size = MSO_AUTO_SIZE.NONE
+            # Anchor text to top so the code appears at the top of the box
+            code_frame.vertical_anchor = MSO_ANCHOR.TOP
+            # Keep small margins so code doesn't touch the edges
             code_frame.margin_left = Inches(0.1)
             code_frame.margin_right = Inches(0.1)
             code_frame.margin_top = Inches(0.1)
@@ -1716,13 +2018,27 @@ class MarkdownToPowerPoint:
             p = code_frame.paragraphs[0]
 
             for token in tokens:
-                if token["text"] == "\n":
-                    # New paragraph for line breaks
-                    p = code_frame.add_paragraph()
+                text = token["text"]
+                # If token contains newline(s), split on '\n' and create new paragraphs for each newline.
+                # This preserves runs' colors and ensures multi-line whitespace tokens (e.g. " \n")
+                # are handled correctly rather than only matching exact "\n".
+                if "\n" in text:
+                    parts = text.split("\n")
+                    for idx, part in enumerate(parts):
+                        if part:
+                            run = p.add_run()
+                            run.text = part
+                            run.font.name = "Courier New"
+                            run.font.size = Pt(12)
+                            if token.get("color"):
+                                run.font.color.rgb = token["color"]
+                        # After each newline except the last, start a new paragraph
+                        if idx != len(parts) - 1:
+                            p = code_frame.add_paragraph()
                 else:
                     # Add run to current paragraph
                     run = p.add_run()
-                    run.text = token["text"]
+                    run.text = text
                     run.font.name = "Courier New"
                     run.font.size = Pt(12)
                     if token.get("color"):
