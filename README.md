@@ -92,13 +92,6 @@ md2ppt create input.md output.pptx \
     --font-color "#FFFFFF" \
     --title-bg-color "#0F172A" \
     --title-font-color "#F59E0B"
-
-# Combine with background image and other options
-md2ppt create input.md output.pptx \
-    --background background.jpg \
-    --font-color FFFFFF \
-    --title-font-color F59E0B \
-    --verbose
 ```
 
 Available color flags:
@@ -213,6 +206,66 @@ This slide has title at top, content below
   (`` `text` ``)
 - **Code Blocks**: Fenced code blocks with syntax highlighting (triple backticks with language identifier)
 
+### Tables
+
+This converter supports a common subset of GitHub-style Markdown tables and
+renders them as native PowerPoint tables. Tables are converted into a native
+table shape on the slide; header rows are styled as bold by default.
+
+Supported behaviors and syntax:
+
+- Basic pipe-separated tables with a header separator row are supported.
+- Outer pipes are optional: both `| a | b |` and `a | b` are recognized.
+- Column alignment is set using the header separator row with colons:
+  - `:---` → left aligned
+  - `:---:` → center aligned
+  - `---:` → right aligned
+- Inline formatting inside cells is supported (bold, italic, inline code).
+- Empty cells are supported.
+- Pipes inside a cell must be escaped with a backslash (`\|`).
+- Tables do not support row-span or col-span (no merged cells).
+- Images and complex block elements inside table cells are not supported;
+  cells are treated as inline content (text with inline formatting).
+
+Basic table example:
+
+```markdown
+| Name  | Role     |
+| ----- | -------- |
+| Alice | Engineer |
+| Bob   | Designer |
+```
+
+Same table without outer pipes:
+
+```markdown
+| Name  | Role     |
+| ----- | -------- |
+| Alice | Engineer |
+| Bob   | Designer |
+```
+
+Table with alignment:
+
+```markdown
+| Left      |  Center  |  Right |
+| :-------- | :------: | -----: |
+| L1        |    C1    |     R1 |
+| long text | **bold** | `code` |
+```
+
+Notes and best practices:
+
+- Always include the header separator row (the line containing dashes and
+  optional colons) immediately after the header row; otherwise the converter
+  will not treat the block as a table.
+- Keep cell content short. PowerPoint column widths are calculated automatically
+  and long content will wrap or make columns narrow.
+- For predictable column widths, prefer simple content and avoid very long
+  paragraphs inside table cells.
+- If you need images or complex layouts within a “table-like” structure, use
+  separate slides and layout shapes manually after conversion.
+
 ### Text Formatting
 
 The converter supports markdown formatting for bold, italic, and inline code:
@@ -265,8 +318,6 @@ Slide content visible to audience
 
 - Bullet point 1
 - Bullet point 2
-
-<!-- You can add multiple notes per slide -->
 ```
 
 Speaker notes support:
@@ -275,29 +326,6 @@ Speaker notes support:
 - Multiple comments per slide (combined automatically)
 - Special characters and Unicode
 - Markdown syntax (preserved as-is in notes)
-
-Example with multi-line notes:
-
-```markdown
-## Key Metrics
-
-Our quarterly results:
-
-<!--
-Timing: 3 minutes
-
-Key talking points:
-- Emphasize the 25% revenue growth
-- Mention customer satisfaction improvements
-- Transition to detailed breakdown next
--->
-
-- Revenue: +25%
-- Customers: +1,500
-- Satisfaction: 92%
-```
-
-For more details, see `docs/explanation/speaker_notes_implementation.md`.
 
 ### Code Blocks
 
@@ -328,8 +356,6 @@ code here
 ```
 ````
 
-````
-
 Replace `language` with the programming language identifier (e.g., `python`,
 `javascript`, `bash`, `sql`). Omit the language identifier for code without
 syntax highlighting.
@@ -341,11 +367,7 @@ syntax highlighting.
 - Add comments for clarity
 - Consider splitting long code across multiple slides
 
-For detailed guide, see `docs/how-to/using_code_blocks.md`.
-
 ### Multi-Line List Items
-</text>
-
 
 List items can span multiple lines by indenting continuation lines. This is
 useful for long bullet points that need to wrap:
@@ -357,7 +379,7 @@ useful for long bullet points that need to wrap:
   line with indentation
 - another list item that also wraps to the next line
 - short item
-````
+```
 
 The continuation lines (indented with spaces or tabs) will be combined with the
 previous bullet point into a single list item in the presentation.

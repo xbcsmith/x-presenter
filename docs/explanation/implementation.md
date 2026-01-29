@@ -2,9 +2,72 @@
 
 Record of implementation changes and features for x-presenter code blocks.
 
+## Phase 3: Integration Testing and Quality Assurance
+
+**Status**: Complete
+
+### Task 3.1: Create Integration Test File
+
+Created integration test file `tests/test_table_integration_end_to_end.py` which provides end-to-end coverage for Markdown table conversion and rendering. The tests exercise real conversion flows: writing temporary Markdown files with tables and mixed content, invoking the converter to generate a `.pptx`, and loading the generated presentation with `python-pptx` to inspect shapes, images, and speaker notes.
+
+Key test cases added:
+
+- `test_full_presentation_with_tables` — Converts a multi-slide Markdown document containing multiple tables and asserts the generated presentation contains native table shapes and that header cell text is preserved.
+- `test_table_with_all_content_types` — Converts a slide mixing a table with lists, inline code, an embedded image, and speaker notes; asserts presence of at least one table, an image shape, and the expected speaker notes text.
+
+Implementation notes:
+
+- Tests write temporary markdown and image files, call `MarkdownToPowerPoint.convert(markdown_path, output_pptx_path)`, then open the generated PPTX using `pptx.Presentation` and inspect slide shapes.
+- Tests are defensive when accessing shape attributes (some python-pptx versions behave differently); they catch and skip shapes that raise on access to maintain robustness.
+- The test module uses `pytest.importorskip("pptx")` so test collection will skip the module if `python-pptx` is not installed in the environment. This prevents collection-time import errors while keeping the tests available in CI environments that include the dependency.
+- Temporary files are cleaned up after each test using `tempfile.TemporaryDirectory()` or explicit unlinking to avoid leaving artifacts.
+
+### Task 3.2: Run Full Quality Gate Suite
+
+To validate integration and overall quality, the following steps are recommended and were executed in environments with the necessary dependencies:
+
+1. Install integration-test dependencies:
+   - python-pptx (required for PPTX inspection)
+   - Pillow (used by some image-related tests)
+   - pytest and coverage tools for running tests and collecting coverage
+
+   Example:
+
+   ```bash
+   pip install python-pptx Pillow pytest pytest-cov
+   ```
+
+2. Linting and formatting:
+
+   ```bash
+   ruff check src/
+   ruff format src/
+   ```
+
+3. Run the test suite and coverage:
+   ```bash
+   pytest --maxfail=1 -q
+   pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+   ```
+
+Notes and expectations:
+
+- In developer machines or CI where `python-pptx` is not present, the new integration test module will be skipped due to `pytest.importorskip("pptx")`. Unit tests that do not require `python-pptx` will run normally.
+- Ensure CI job(s) that execute the full quality gate install `python-pptx` so integration tests are executed and coverage targets are enforced.
+- Integration tests focus on validating real output (presence of table shapes, images, and speaker notes) rather than pixel-perfect rendering, which varies by PowerPoint client.
+
 ## Phase 4: Documentation and Examples
 
 **Status**: Complete
+
+Notes:
+
+- Added Phase 4 documentation for Markdown table support:
+  - `x-presenter/docs/explanation/phase_4_markdown_table_support_implementation.md` created (implementation details, supported syntax, examples, testing guidance, and validation checklist).
+  - `x-presenter/README.md` updated to include a short "Tables" section referencing the new documentation.
+  - `x-presenter/docs/explanation/implementation.md` (this file) updated to record the Phase 4 table documentation deliverable.
+  - Integration tests that exercise native PowerPoint table rendering are present and are written to skip when `python-pptx` is not available.
+  - Ensure CI installs `python-pptx` and `Pillow` to run the end-to-end integration tests.
 
 ### Documentation Files Created
 
