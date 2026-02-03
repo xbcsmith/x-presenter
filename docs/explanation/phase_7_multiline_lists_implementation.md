@@ -1,3 +1,41 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 7: Multi-Line List Support Implementation](#phase-7-multi-line-list-support-implementation)
+  - [Overview](#overview)
+  - [Problem Statement](#problem-statement)
+    - [Example of the Problem](#example-of-the-problem)
+  - [Solution Implementation](#solution-implementation)
+    - [Algorithm Changes](#algorithm-changes)
+    - [Key Implementation Details](#key-implementation-details)
+      - [Line Processing](#line-processing)
+      - [Continuation Detection](#continuation-detection)
+      - [Smart Empty Line Handling](#smart-empty-line-handling)
+  - [Testing](#testing)
+    - [Basic Functionality](#basic-functionality)
+    - [Edge Cases](#edge-cases)
+    - [Integration Tests](#integration-tests)
+  - [Examples](#examples)
+    - [Example 1: Simple Continuation](#example-1-simple-continuation)
+    - [Example 2: Multiple Continuations](#example-2-multiple-continuations)
+    - [Example 3: Real-World Usage](#example-3-real-world-usage)
+  - [Impact on Existing Features](#impact-on-existing-features)
+    - [Backward Compatibility](#backward-compatibility)
+    - [Integration with Other Features](#integration-with-other-features)
+  - [Performance Considerations](#performance-considerations)
+  - [Known Limitations](#known-limitations)
+  - [Documentation Updates](#documentation-updates)
+    - [Updated Files](#updated-files)
+    - [Test Coverage](#test-coverage)
+  - [Code Quality](#code-quality)
+  - [Future Enhancements](#future-enhancements)
+  - [Conclusion](#conclusion)
+  - [Files Modified](#files-modified)
+  - [Validation Checklist](#validation-checklist)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 7: Multi-Line List Support Implementation
 
 ## Overview

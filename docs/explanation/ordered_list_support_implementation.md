@@ -1,3 +1,35 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Ordered List Support Implementation](#ordered-list-support-implementation)
+  - [Overview](#overview)
+  - [Problem Statement](#problem-statement)
+  - [Solution](#solution)
+    - [Key Changes](#key-changes)
+  - [Implementation Details](#implementation-details)
+    - [Regex Pattern](#regex-pattern)
+    - [List Item Extraction](#list-item-extraction)
+  - [Supported Syntax](#supported-syntax)
+  - [Examples](#examples)
+    - [Basic Ordered List](#basic-ordered-list)
+    - [Ordered List with Formatting](#ordered-list-with-formatting)
+    - [Mixed Lists](#mixed-lists)
+    - [Continuation Lines](#continuation-lines)
+  - [Testing](#testing)
+    - [Test Coverage](#test-coverage)
+    - [Coverage](#coverage)
+  - [Quality Gates](#quality-gates)
+  - [Backward Compatibility](#backward-compatibility)
+  - [Edge Cases Handled](#edge-cases-handled)
+  - [Related Documentation](#related-documentation)
+  - [Future Enhancements](#future-enhancements)
+  - [Migration Guide](#migration-guide)
+    - [Updating Existing Markdown](#updating-existing-markdown)
+  - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Ordered List Support Implementation
 
 ## Overview

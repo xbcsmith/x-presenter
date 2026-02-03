@@ -1,3 +1,49 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 1: Code Blocks Core Parsing Implementation](#phase-1-code-blocks-core-parsing-implementation)
+  - [Overview](#overview)
+  - [Implementation Summary](#implementation-summary)
+    - [Changes Made](#changes-made)
+      - [1. Enhanced slide_data Structure](#1-enhanced-slide_data-structure)
+      - [2. State Tracking Variables](#2-state-tracking-variables)
+      - [3. Code Block Detection Logic](#3-code-block-detection-logic)
+      - [4. List Closure on Code Block Start](#4-list-closure-on-code-block-start)
+      - [5. Unclosed Code Block Handling](#5-unclosed-code-block-handling)
+      - [6. Indentation Preservation](#6-indentation-preservation)
+      - [7. Documentation Updates](#7-documentation-updates)
+  - [Testing](#testing)
+    - [Test Coverage](#test-coverage)
+      - [Basic Functionality (8 tests)](#basic-functionality-8-tests)
+      - [Edge Cases (5 tests)](#edge-cases-5-tests)
+      - [Edge Case Handling (4 tests)](#edge-case-handling-4-tests)
+    - [Test Results](#test-results)
+  - [Quality Metrics](#quality-metrics)
+    - [Code Quality](#code-quality)
+    - [Regression Testing](#regression-testing)
+  - [Success Criteria Met](#success-criteria-met)
+  - [Code Block Structure](#code-block-structure)
+  - [Known Limitations](#known-limitations)
+  - [Next Steps](#next-steps)
+  - [Files Modified](#files-modified)
+  - [Files Created](#files-created)
+  - [Integration Notes](#integration-notes)
+  - [Example Usage](#example-usage)
+- [Access parsed code blocks](#access-parsed-code-blocks)
+- [Output:](#output)
+- [Language: python](#language-python)
+- [Code:](#code)
+- [def greet(name):](#def-greetname)
+- ['''Say hello to someone.'''](#say-hello-to-someone)
+- [return f"Hello, {name}!"](#return-fhello-name)
+    - [Language Identifier Extraction](#language-identifier-extraction)
+    - [Empty Code Block Handling](#empty-code-block-handling)
+    - [Consecutive Code Block Handling](#consecutive-code-block-handling)
+  - [Changelog](#changelog)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 1: Code Blocks Core Parsing Implementation
 
 ## Overview

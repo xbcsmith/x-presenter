@@ -1,3 +1,47 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Markdown Table Support Implementation Plan](#markdown-table-support-implementation-plan)
+  - [Overview](#overview)
+  - [Current State Analysis](#current-state-analysis)
+    - [Existing Infrastructure](#existing-infrastructure)
+    - [Identified Issues](#identified-issues)
+  - [Explicit Constants and Configuration](#explicit-constants-and-configuration)
+  - [Table Data Structure](#table-data-structure)
+  - [Implementation Phases](#implementation-phases)
+    - [Phase 0: Architecture Analysis and Preparation](#phase-0-architecture-analysis-and-preparation)
+      - [Task 0.1: Verify Integration Points](#task-01-verify-integration-points)
+      - [Task 0.2: Architecture Decision - Keep in converter.py](#task-02-architecture-decision---keep-in-converterpy)
+    - [Phase 1: Table Detection and Parsing](#phase-1-table-detection-and-parsing)
+      - [Task 1.1: Add Table Detection Helper Methods](#task-11-add-table-detection-helper-methods)
+      - [Task 1.2: Integrate Table Detection into State Machine](#task-12-integrate-table-detection-into-state-machine)
+      - [Task 1.3: Unit Tests for Table Parsing](#task-13-unit-tests-for-table-parsing)
+    - [Phase 2: Table Rendering](#phase-2-table-rendering)
+      - [Task 2.1: Add Table Rendering Constants](#task-21-add-table-rendering-constants)
+      - [Task 2.2: Add Table Dimension Calculation Method](#task-22-add-table-dimension-calculation-method)
+      - [Task 2.3: Add Table Cell Rendering Method](#task-23-add-table-cell-rendering-method)
+      - [Task 2.4: Integrate Table Rendering into Slide Generation](#task-24-integrate-table-rendering-into-slide-generation)
+      - [Task 2.5: Add Table Rendering Tests](#task-25-add-table-rendering-tests)
+    - [Phase 3: Integration Testing and Quality Assurance](#phase-3-integration-testing-and-quality-assurance)
+      - [Task 3.1: Create Integration Test File](#task-31-create-integration-test-file)
+      - [Task 3.2: Run Full Quality Gate Suite](#task-32-run-full-quality-gate-suite)
+    - [Phase 4: Documentation](#phase-4-documentation)
+      - [Task 4.1: Create Implementation Documentation](#task-41-create-implementation-documentation)
+      - [Task 4.2: Update README.md](#task-42-update-readmemd)
+  - [Final Validation Checklist](#final-validation-checklist)
+    - [Code Quality](#code-quality)
+    - [Test Execution](#test-execution)
+    - [Documentation](#documentation)
+    - [Functionality](#functionality)
+    - [File Checklist](#file-checklist)
+  - [Success Metrics](#success-metrics)
+  - [Risk Mitigation Summary](#risk-mitigation-summary)
+  - [Estimated Timeline](#estimated-timeline)
+  - [Conclusion](#conclusion)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Markdown Table Support Implementation Plan
 
 ## Overview

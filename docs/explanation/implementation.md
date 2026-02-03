@@ -1,3 +1,41 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Implementation Changelog](#implementation-changelog)
+  - [Phase 3: Integration Testing and Quality Assurance](#phase-3-integration-testing-and-quality-assurance)
+    - [Task 3.1: Create Integration Test File](#task-31-create-integration-test-file)
+    - [Task 3.2: Run Full Quality Gate Suite](#task-32-run-full-quality-gate-suite)
+  - [Phase 4: Documentation and Examples](#phase-4-documentation-and-examples)
+    - [Documentation Files Created](#documentation-files-created)
+      - [1. User Guide: `docs/how-to/using_code_blocks.md`](#1-user-guide-docshow-tousing_code_blocksmd)
+    - [2. Implementation Documentation: `docs/explanation/code_blocks_implementation.md`](#2-implementation-documentation-docsexplanationcode_blocks_implementationmd)
+    - [3. README Updates: `README.md`](#3-readme-updates-readmemd)
+    - [4. Example Markdown Files: `testdata/content/`](#4-example-markdown-files-testdatacontent)
+      - [a. `code_blocks_examples.md`](#a-code_blocks_examplesmd)
+      - [b. `code_blocks_quick_start.md`](#b-code_blocks_quick_startmd)
+  - [Quality Assurance](#quality-assurance)
+    - [Documentation Validation](#documentation-validation)
+    - [File Naming Compliance](#file-naming-compliance)
+    - [Documentation Location Compliance](#documentation-location-compliance)
+  - [Summary of Deliverables](#summary-of-deliverables)
+    - [Documentation Files (3)](#documentation-files-3)
+    - [README Updates (1)](#readme-updates-1)
+    - [Test Data Files (2)](#test-data-files-2)
+  - [Phase 4 Success Criteria Met](#phase-4-success-criteria-met)
+  - [Phase 5: Integration and Validation](#phase-5-integration-and-validation)
+    - [5.1 Bug Fixes - Markdown Formatting Regex](#51-bug-fixes---markdown-formatting-regex)
+    - [5.2 Integration Test Suite](#52-integration-test-suite)
+    - [5.3 Performance Testing Results](#53-performance-testing-results)
+    - [5.4 Backward Compatibility Verification](#54-backward-compatibility-verification)
+    - [5.5 Quality Gates Validation](#55-quality-gates-validation)
+    - [5.6 Documentation Quality](#56-documentation-quality)
+    - [5.7 Example Presentations](#57-example-presentations)
+  - [Phase 5 Success Criteria Met](#phase-5-success-criteria-met)
+  - [Summary of Code Blocks Feature - All Phases Complete](#summary-of-code-blocks-feature---all-phases-complete)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Implementation Changelog
 
 Record of implementation changes and features for x-presenter code blocks.

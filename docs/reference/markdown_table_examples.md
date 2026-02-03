@@ -1,3 +1,39 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Markdown Table Examples](#markdown-table-examples)
+  - [Basic Tables](#basic-tables)
+    - [Simple 2x2 Table](#simple-2x2-table)
+    - [Simple 3x3 Table](#simple-3x3-table)
+  - [Tables with Alignment](#tables-with-alignment)
+    - [Left-Aligned Columns](#left-aligned-columns)
+    - [Center-Aligned Columns](#center-aligned-columns)
+    - [Right-Aligned Columns](#right-aligned-columns)
+    - [Mixed Alignment](#mixed-alignment)
+  - [Tables with Inline Formatting](#tables-with-inline-formatting)
+    - [Bold Text in Cells](#bold-text-in-cells)
+    - [Italic Text in Cells](#italic-text-in-cells)
+    - [Inline Code in Cells](#inline-code-in-cells)
+    - [Combined Formatting](#combined-formatting)
+  - [Edge Cases](#edge-cases)
+    - [Single Column Table](#single-column-table)
+    - [Single Row Table](#single-row-table)
+    - [Empty Cells](#empty-cells)
+    - [Wide Table (Many Columns)](#wide-table-many-columns)
+    - [Tall Table (Many Rows)](#tall-table-many-rows)
+  - [Real-World Examples](#real-world-examples)
+    - [Project Timeline](#project-timeline)
+    - [Test Results](#test-results)
+    - [API Endpoints](#api-endpoints)
+    - [Comparison Table](#comparison-table)
+  - [Tables in Context with Other Content](#tables-in-context-with-other-content)
+    - [Mixed Content Example](#mixed-content-example)
+      - [Performance Metrics](#performance-metrics)
+  - [Notes](#notes)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Markdown Table Examples
 
 This document provides examples of Markdown tables for testing and reference

@@ -1,3 +1,17 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Welcome to Speaker Notes Demo](#welcome-to-speaker-notes-demo)
+  - [What are Speaker Notes?](#what-are-speaker-notes)
+  - [How to Add Speaker Notes](#how-to-add-speaker-notes)
+  - [Multiple Notes Per Slide](#multiple-notes-per-slide)
+  - [Advanced Features](#advanced-features)
+  - [Best Practices](#best-practices)
+  - [Thank You!](#thank-you)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Welcome to Speaker Notes Demo
 
 This presentation demonstrates the new speaker notes feature.

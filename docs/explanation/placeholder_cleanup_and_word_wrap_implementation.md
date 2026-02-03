@@ -1,3 +1,45 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Placeholder Cleanup and Word Wrap Implementation](#placeholder-cleanup-and-word-wrap-implementation)
+  - [Overview](#overview)
+  - [Problem Statement](#problem-statement)
+    - [Issue 1: Empty Placeholders](#issue-1-empty-placeholders)
+    - [Issue 2: Word Wrap Inconsistency](#issue-2-word-wrap-inconsistency)
+  - [Solution Design](#solution-design)
+    - [Placeholder Removal Strategy](#placeholder-removal-strategy)
+    - [Word Wrap Configuration](#word-wrap-configuration)
+  - [Implementation Details](#implementation-details)
+    - [New Method: `_remove_unused_placeholders()`](#new-method-_remove_unused_placeholders)
+    - [Updated: `add_slide_to_presentation()`](#updated-add_slide_to_presentation)
+    - [Word Wrap Enhancement](#word-wrap-enhancement)
+  - [Code Changes](#code-changes)
+    - [Files Modified](#files-modified)
+    - [Key Changes](#key-changes)
+  - [Technical Details](#technical-details)
+    - [PowerPoint Placeholder Types](#powerpoint-placeholder-types)
+    - [XML Element Removal](#xml-element-removal)
+    - [Why Remove Body Placeholder](#why-remove-body-placeholder)
+  - [Testing Strategy](#testing-strategy)
+    - [Unit Tests Required](#unit-tests-required)
+    - [Integration Tests](#integration-tests)
+    - [Edge Cases](#edge-cases)
+  - [Examples](#examples)
+    - [Before (Empty Placeholders)](#before-empty-placeholders)
+    - [After (Clean)](#after-clean)
+  - [Performance Considerations](#performance-considerations)
+  - [Compatibility](#compatibility)
+  - [Future Enhancements](#future-enhancements)
+  - [Quality Gates](#quality-gates)
+    - [Code Quality](#code-quality)
+    - [Documentation](#documentation)
+    - [Testing](#testing)
+  - [References](#references)
+  - [Conclusion](#conclusion)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Placeholder Cleanup and Word Wrap Implementation
 
 ## Overview

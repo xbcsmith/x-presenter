@@ -1,3 +1,39 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 5: Integration and Validation Implementation](#phase-5-integration-and-validation-implementation)
+  - [Executive Summary](#executive-summary)
+  - [Implementation Details](#implementation-details)
+    - [5.1 Regression Fix: Markdown Formatting Regex](#51-regression-fix-markdown-formatting-regex)
+    - [5.2 Integration Test Suite](#52-integration-test-suite)
+      - [TestCodeBlocksWithLists (3 tests)](#testcodeblockswithlists-3-tests)
+      - [TestCodeBlocksWithText (2 tests)](#testcodeblockswithtext-2-tests)
+      - [TestCodeBlocksWithSpeakerNotes (1 test)](#testcodeblockswithspeakernotes-1-test)
+      - [TestCodeBlocksMultipleSlidesPerDeck (2 tests)](#testcodeblocksmultipleslidesperdeck-2-tests)
+      - [TestCodeBlockLanguages (3 tests)](#testcodeblocklanguages-3-tests)
+      - [TestCodeBlockEdgeCases (6 tests)](#testcodeblockedgecases-6-tests)
+      - [TestBackwardCompatibility (4 tests)](#testbackwardcompatibility-4-tests)
+      - [TestPerformance (2 tests)](#testperformance-2-tests)
+      - [TestCodeBlocksEndToEnd (3 tests)](#testcodeblocksendtoend-3-tests)
+    - [5.3 Performance Testing Results](#53-performance-testing-results)
+    - [5.4 Backward Compatibility Verification](#54-backward-compatibility-verification)
+    - [5.5 Quality Gates Validation](#55-quality-gates-validation)
+      - [Code Quality (Ruff)](#code-quality-ruff)
+      - [Test Coverage](#test-coverage)
+      - [Test Execution](#test-execution)
+    - [5.6 Feature Integration Verification](#56-feature-integration-verification)
+    - [5.7 Example Presentations](#57-example-presentations)
+  - [Deliverables Summary](#deliverables-summary)
+    - [Bug Fixes](#bug-fixes)
+    - [Integration Tests](#integration-tests)
+    - [Quality Assurance](#quality-assurance)
+    - [Documentation](#documentation)
+  - [Success Criteria Achievement](#success-criteria-achievement)
+  - [Conclusion](#conclusion)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 5: Integration and Validation Implementation
 
 ## Executive Summary

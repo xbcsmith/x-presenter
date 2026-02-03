@@ -1,3 +1,42 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Code Blocks Implementation - Deliverables Checklist](#code-blocks-implementation---deliverables-checklist)
+  - [Executive Summary](#executive-summary)
+  - [Phase 1: Core Parsing Implementation](#phase-1-core-parsing-implementation)
+    - [Items Phase 1](#items-phase-1)
+    - [Criteria Phase 1](#criteria-phase-1)
+  - [Phase 2: Syntax Highlighting Implementation](#phase-2-syntax-highlighting-implementation)
+    - [Items Phase 2](#items-phase-2)
+    - [Supported Languages Phase 2](#supported-languages-phase-2)
+    - [Criteria Phase 2](#criteria-phase-2)
+  - [Phase 3: Rendering Implementation](#phase-3-rendering-implementation)
+    - [Items Phase 3](#items-phase-3)
+    - [Configuration Phase 3](#configuration-phase-3)
+    - [Criteria Phase 3](#criteria-phase-3)
+  - [Phase 4: Documentation and Examples](#phase-4-documentation-and-examples)
+    - [Items Phase 4](#items-phase-4)
+    - [Quality Gates Phase 4](#quality-gates-phase-4)
+    - [Files Phase 4](#files-phase-4)
+    - [Criteria Phase 4](#criteria-phase-4)
+  - [Phase 5: Integration and Validation](#phase-5-integration-and-validation)
+    - [Items Phase 5](#items-phase-5)
+    - [Test Scenarios Phase 5](#test-scenarios-phase-5)
+    - [Gates Phase 5](#gates-phase-5)
+    - [Metrics Phase 5](#metrics-phase-5)
+    - [Criteria Phase 5](#criteria-phase-5)
+  - [Summary by Phase](#summary-by-phase)
+    - [Phase 1: Parsing ✅](#phase-1-parsing-)
+    - [Phase 2: Syntax Highlighting ✅](#phase-2-syntax-highlighting-)
+    - [Phase 3: Rendering ✅](#phase-3-rendering-)
+    - [Phase 4: Documentation ✅](#phase-4-documentation-)
+    - [Phase 5: Integration & Validation ✅](#phase-5-integration--validation-)
+  - [Overall Status: ✅ COMPLETE](#overall-status--complete)
+    - [No Outstanding Deliverables](#no-outstanding-deliverables)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Code Blocks Implementation - Deliverables Checklist
 
 ## Executive Summary

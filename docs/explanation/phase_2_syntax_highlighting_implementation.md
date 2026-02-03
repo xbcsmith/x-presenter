@@ -1,3 +1,42 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 2: Syntax Highlighting Implementation](#phase-2-syntax-highlighting-implementation)
+  - [Overview](#overview)
+  - [Implementation Summary](#implementation-summary)
+    - [Changes Made](#changes-made)
+      - [1. Syntax Color Detection Method: `_get_syntax_color()`](#1-syntax-color-detection-method-_get_syntax_color)
+      - [2. Code Tokenization Method: `_tokenize_code()`](#2-code-tokenization-method-_tokenize_code)
+      - [3. Integration Points](#3-integration-points)
+  - [Testing](#testing)
+    - [Test Coverage by Category](#test-coverage-by-category)
+      - [Color Detection (21 tests)](#color-detection-21-tests)
+      - [Code Tokenization (20 tests)](#code-tokenization-20-tests)
+      - [Integration Tests (9 tests)](#integration-tests-9-tests)
+      - [Color Scheme Consistency (3 tests)](#color-scheme-consistency-3-tests)
+    - [Test Results](#test-results)
+  - [Quality Metrics](#quality-metrics)
+    - [Code Quality](#code-quality)
+    - [Implementation Quality](#implementation-quality)
+  - [Success Criteria Met](#success-criteria-met)
+  - [Known Limitations](#known-limitations)
+  - [Next Steps](#next-steps)
+  - [Files Modified](#files-modified)
+    - [`src/presenter/converter.py`](#srcpresenterconverterpy)
+  - [Files Created](#files-created)
+    - [`tests/test_syntax_highlighting.py`](#teststest_syntax_highlightingpy)
+  - [Integration Notes](#integration-notes)
+  - [Example Usage](#example-usage)
+  - [Technical Details](#technical-details)
+    - [String Parsing](#string-parsing)
+    - [Number Detection](#number-detection)
+    - [Case-Insensitive Keywords](#case-insensitive-keywords)
+    - [Language Normalization](#language-normalization)
+  - [Changelog](#changelog)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 2: Syntax Highlighting Implementation
 
 ## Overview

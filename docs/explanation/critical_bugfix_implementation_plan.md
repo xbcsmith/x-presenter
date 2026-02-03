@@ -1,3 +1,56 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Critical Bugfix Implementation Plan](#critical-bugfix-implementation-plan)
+  - [Overview](#overview)
+  - [Current State Analysis](#current-state-analysis)
+    - [Existing Infrastructure](#existing-infrastructure)
+    - [Identified Issues](#identified-issues)
+  - [Implementation Phases](#implementation-phases)
+    - [Phase 1: File Extension Correction and Test Organization](#phase-1-file-extension-correction-and-test-organization)
+      - [1.1 Foundation Work](#11-foundation-work)
+      - [1.2 Reorganize Test Data](#12-reorganize-test-data)
+      - [1.3 Add Foundation Functionality](#13-add-foundation-functionality)
+      - [1.4 Integrate Foundation Work](#14-integrate-foundation-work)
+      - [1.5 Testing Requirements](#15-testing-requirements)
+      - [1.6 Deliverables](#16-deliverables)
+      - [1.7 Success Criteria](#17-success-criteria)
+    - [Phase 2: Command-Line Argument Fixes](#phase-2-command-line-argument-fixes)
+      - [2.1 Feature Work](#21-feature-work)
+      - [2.2 Integrate Feature](#22-integrate-feature)
+      - [2.3 Configuration Updates](#23-configuration-updates)
+      - [2.4 Testing Requirements](#24-testing-requirements)
+      - [2.5 Deliverables](#25-deliverables)
+      - [2.6 Success Criteria](#26-success-criteria)
+    - [Phase 3: Background Image Variable Reference](#phase-3-background-image-variable-reference)
+      - [3.1 Feature Work](#31-feature-work)
+      - [3.2 Integrate Feature](#32-integrate-feature)
+      - [3.3 Configuration Updates](#33-configuration-updates)
+      - [3.4 Testing Requirements](#34-testing-requirements)
+      - [3.5 Deliverables](#35-deliverables)
+      - [3.6 Success Criteria](#36-success-criteria)
+    - [Phase 4: Filename Handling Alignment](#phase-4-filename-handling-alignment)
+      - [4.1 Feature Work](#41-feature-work)
+      - [4.2 Integrate Feature](#42-integrate-feature)
+      - [4.3 Configuration Updates](#43-configuration-updates)
+      - [4.4 Testing Requirements](#44-testing-requirements)
+      - [4.5 Deliverables](#45-deliverables)
+      - [4.6 Success Criteria](#46-success-criteria)
+    - [Phase 5: Validation and Documentation](#phase-5-validation-and-documentation)
+      - [5.1 Feature Work](#51-feature-work)
+      - [5.2 Integrate Feature](#52-integrate-feature)
+      - [5.3 Configuration Updates](#53-configuration-updates)
+      - [5.4 Testing Requirements](#54-testing-requirements)
+      - [5.5 Deliverables](#55-deliverables)
+      - [5.6 Success Criteria](#56-success-criteria)
+  - [Risk Assessment](#risk-assessment)
+  - [Dependencies](#dependencies)
+  - [Timeline Estimate](#timeline-estimate)
+  - [Open Questions](#open-questions)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Critical Bugfix Implementation Plan
 
 ## Overview

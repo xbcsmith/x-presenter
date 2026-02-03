@@ -1,3 +1,39 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [How to Use Speaker Notes in x-presenter](#how-to-use-speaker-notes-in-x-presenter)
+  - [Quick Start](#quick-start)
+  - [Basic Syntax](#basic-syntax)
+    - [Single-line Note](#single-line-note)
+    - [Multi-line Note](#multi-line-note)
+  - [Usage Patterns](#usage-patterns)
+    - [Timing Guidance](#timing-guidance)
+    - [Transition Cues](#transition-cues)
+    - [Demo Reminders](#demo-reminders)
+    - [Detailed Talking Points](#detailed-talking-points)
+  - [Multiple Notes Per Slide](#multiple-notes-per-slide)
+  - [Best Practices](#best-practices)
+    - [Do](#do)
+    - [Don't](#dont)
+  - [Converting Your Presentation](#converting-your-presentation)
+  - [Viewing Speaker Notes](#viewing-speaker-notes)
+  - [Special Features](#special-features)
+    - [Unicode Support](#unicode-support)
+    - [Special Characters](#special-characters)
+    - [Markdown in Notes](#markdown-in-notes)
+  - [Troubleshooting](#troubleshooting)
+    - [Notes not appearing](#notes-not-appearing)
+    - [Comments showing on slides](#comments-showing-on-slides)
+    - [Notes are cut off](#notes-are-cut-off)
+  - [Examples](#examples)
+    - [Complete Slide Example](#complete-slide-example)
+    - [Presentation with Background](#presentation-with-background)
+  - [Additional Resources](#additional-resources)
+  - [Quick Reference Card](#quick-reference-card)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # How to Use Speaker Notes in x-presenter
 
 This guide shows you how to add speaker notes to your presentations using

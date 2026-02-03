@@ -1,3 +1,52 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Markdown Formatting Implementation](#markdown-formatting-implementation)
+  - [Overview](#overview)
+  - [Problem Statement](#problem-statement)
+  - [Solution Design](#solution-design)
+    - [Markdown Syntax Support](#markdown-syntax-support)
+    - [Architecture](#architecture)
+  - [Implementation Details](#implementation-details)
+    - [New Method: `_parse_markdown_formatting()`](#new-method-_parse_markdown_formatting)
+    - [New Method: `_apply_text_formatting()`](#new-method-_apply_text_formatting)
+    - [Updated: Slide Content Rendering](#updated-slide-content-rendering)
+      - [1. Titles](#1-titles)
+      - [2. Content Paragraphs](#2-content-paragraphs)
+      - [3. List Items](#3-list-items)
+  - [Code Changes](#code-changes)
+    - [Files Modified](#files-modified)
+    - [Key Additions](#key-additions)
+  - [Technical Details](#technical-details)
+    - [Regex Pattern](#regex-pattern)
+    - [PowerPoint Runs](#powerpoint-runs)
+    - [Font Handling](#font-handling)
+    - [Color Preservation](#color-preservation)
+  - [Examples](#examples)
+    - [Basic Formatting](#basic-formatting)
+    - [Complex Formatting](#complex-formatting)
+  - [Testing Strategy](#testing-strategy)
+    - [Unit Tests](#unit-tests)
+    - [Test Coverage](#test-coverage)
+  - [Limitations and Known Issues](#limitations-and-known-issues)
+    - [Current Limitations](#current-limitations)
+    - [Edge Cases](#edge-cases)
+  - [Performance Considerations](#performance-considerations)
+  - [Compatibility](#compatibility)
+  - [Future Enhancements](#future-enhancements)
+  - [Quality Gates](#quality-gates)
+    - [Code Quality](#code-quality)
+    - [Documentation](#documentation)
+    - [Testing](#testing)
+  - [Migration Notes](#migration-notes)
+    - [For Users](#for-users)
+    - [For Developers](#for-developers)
+  - [References](#references)
+  - [Conclusion](#conclusion)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Markdown Formatting Implementation
 
 ## Overview

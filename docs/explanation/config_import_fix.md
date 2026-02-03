@@ -1,3 +1,19 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Config Import Fix - NameError Resolution](#config-import-fix---nameerror-resolution)
+  - [Issue](#issue)
+  - [Root Cause](#root-cause)
+  - [Solution](#solution)
+  - [Changes Made](#changes-made)
+    - [Import Section (Lines 1-20)](#import-section-lines-1-20)
+  - [Verification](#verification)
+  - [Testing](#testing)
+  - [Impact](#impact)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Config Import Fix - NameError Resolution
 
 ## Issue

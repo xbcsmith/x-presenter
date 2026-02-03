@@ -1,3 +1,39 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 1: File Extension Correction and Test Organization - Implementation Summary](#phase-1-file-extension-correction-and-test-organization---implementation-summary)
+  - [Overview](#overview)
+  - [Issues Fixed](#issues-fixed)
+    - [Issue 1: Incorrect File Extension (.ppt instead of .pptx)](#issue-1-incorrect-file-extension-ppt-instead-of-pptx)
+    - [Issue 2: Background Image Variable Reference](#issue-2-background-image-variable-reference)
+  - [Test Data Organization](#test-data-organization)
+    - [Directory Structure Changes](#directory-structure-changes)
+    - [Rationale](#rationale)
+  - [Files Modified](#files-modified)
+    - [1. `src/presenter/converter.py`](#1-srcpresenterconverterpy)
+    - [2. `README.md`](#2-readmemd)
+    - [3. `tests/test_converter.py`](#3-teststest_converterpy)
+    - [4. `src/presenter/main.py`](#4-srcpresentermainpy)
+    - [5. `.gitignore`](#5-gitignore)
+  - [Testing and Validation](#testing-and-validation)
+    - [Test Execution](#test-execution)
+    - [Validation Checks Performed](#validation-checks-performed)
+    - [Regression Testing](#regression-testing)
+  - [Success Criteria Met](#success-criteria-met)
+  - [Components Verified](#components-verified)
+    - [MarkdownToPowerPoint Class](#markdowntopowerpoint-class)
+    - [Configuration (Config Dataclass)](#configuration-config-dataclass)
+    - [create_presentation() Function](#create_presentation-function)
+  - [Known Limitations](#known-limitations)
+  - [Code Quality](#code-quality)
+    - [Formatting](#formatting)
+    - [Documentation](#documentation)
+  - [Next Steps](#next-steps)
+  - [Summary](#summary)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 1: File Extension Correction and Test Organization - Implementation Summary
 
 ## Overview

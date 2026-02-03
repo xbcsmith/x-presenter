@@ -1,3 +1,40 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Title Slide Layout Implementation](#title-slide-layout-implementation)
+  - [Overview](#overview)
+  - [Background](#background)
+  - [Requirements](#requirements)
+  - [Implementation Details](#implementation-details)
+    - [Layout Detection Logic](#layout-detection-logic)
+    - [PowerPoint Layout Mapping](#powerpoint-layout-mapping)
+    - [Modified Methods](#modified-methods)
+      - [`add_slide_to_presentation()`](#add_slide_to_presentation)
+      - [Title Placement](#title-placement)
+    - [Content Positioning](#content-positioning)
+  - [Examples](#examples)
+    - [Example 1: Standard Presentation](#example-1-standard-presentation)
+    - [Example 2: No Title Slide](#example-2-no-title-slide)
+    - [Example 3: Multiple H1 Headers](#example-3-multiple-h1-headers)
+  - [Testing](#testing)
+    - [Layout Assignment Tests](#layout-assignment-tests)
+    - [Content Tests](#content-tests)
+    - [Edge Cases](#edge-cases)
+  - [Integration with Existing Features](#integration-with-existing-features)
+    - [Speaker Notes](#speaker-notes)
+    - [Background Images](#background-images)
+    - [Images, Lists, and Content](#images-lists-and-content)
+  - [Backward Compatibility](#backward-compatibility)
+  - [Benefits](#benefits)
+    - [For Users](#for-users)
+    - [For Developers](#for-developers)
+  - [Future Enhancements](#future-enhancements)
+  - [Conclusion](#conclusion)
+  - [Related Documentation](#related-documentation)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Title Slide Layout Implementation
 
 ## Overview

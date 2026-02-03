@@ -1,3 +1,52 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 4: Filename Handling Alignment Implementation](#phase-4-filename-handling-alignment-implementation)
+  - [Overview](#overview)
+  - [Problem Statement](#problem-statement)
+  - [Solution Architecture](#solution-architecture)
+    - [Three Operational Modes](#three-operational-modes)
+      - [Mode 1: Input/Output Pair](#mode-1-inputoutput-pair)
+      - [Mode 2: Single File with Auto Output](#mode-2-single-file-with-auto-output)
+      - [Mode 3: Multiple Files with Output Directory](#mode-3-multiple-files-with-output-directory)
+    - [Error Handling](#error-handling)
+  - [Implementation Details](#implementation-details)
+    - [Config Dataclass Changes](#config-dataclass-changes)
+    - [CLI Argument Processing](#cli-argument-processing)
+    - [Converter Function Updates](#converter-function-updates)
+  - [Testing Coverage](#testing-coverage)
+    - [Test File](#test-file)
+      - [TestFilenameHandlingModes (11 tests)](#testfilenamehandlingmodes-11-tests)
+      - [TestFilenameHandlingWithBackground (3 tests)](#testfilenamehandlingwithbackground-3-tests)
+      - [TestOutputFileNaming (6 tests)](#testoutputfilenaming-6-tests)
+      - [TestVerboseOutput (1 test)](#testverboseoutput-1-test)
+    - [Test Coverage Metrics](#test-coverage-metrics)
+  - [Documentation Updates](#documentation-updates)
+    - [README.md Changes](#readmemd-changes)
+    - [New Usage Modes Section](#new-usage-modes-section)
+    - [Background Image Integration](#background-image-integration)
+  - [Backward Compatibility](#backward-compatibility)
+    - [Breaking Changes](#breaking-changes)
+    - [Mitigation](#mitigation)
+  - [Quality Assurance](#quality-assurance)
+    - [Code Quality Gates](#code-quality-gates)
+    - [Markdown Quality](#markdown-quality)
+  - [Examples](#examples)
+    - [Real-World Usage Scenarios](#real-world-usage-scenarios)
+      - [Scenario 1: Quick Presentation Creation](#scenario-1-quick-presentation-creation)
+      - [Scenario 2: Custom Output Naming](#scenario-2-custom-output-naming)
+      - [Scenario 3: Batch Course Material Generation](#scenario-3-batch-course-material-generation)
+      - [Scenario 4: With Background Images](#scenario-4-with-background-images)
+  - [Components](#components)
+    - [Modified Files](#modified-files)
+    - [New Files](#new-files)
+  - [Validation Checklist](#validation-checklist)
+  - [Next Steps](#next-steps)
+  - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 4: Filename Handling Alignment Implementation
 
 ## Overview

@@ -1,3 +1,43 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 3: Background Image Variable Reference Implementation](#phase-3-background-image-variable-reference-implementation)
+  - [Overview](#overview)
+  - [Current State](#current-state)
+    - [Code Analysis](#code-analysis)
+    - [Background Image Flow](#background-image-flow)
+  - [Implementation Details](#implementation-details)
+    - [MarkdownToPowerPoint Class](#markdowntopowerpoint-class)
+    - [Background Image Validation](#background-image-validation)
+    - [Background Image Rendering](#background-image-rendering)
+    - [Path Resolution](#path-resolution)
+  - [Testing](#testing)
+    - [Test Coverage](#test-coverage)
+      - [Initialization Tests (3 tests)](#initialization-tests-3-tests)
+      - [Convert Method Tests (4 tests)](#convert-method-tests-4-tests)
+      - [Create Presentation Tests (4 tests)](#create-presentation-tests-4-tests)
+      - [Edge Cases Tests (5 tests)](#edge-cases-tests-5-tests)
+    - [Test Suite Results](#test-suite-results)
+  - [Quality Gates](#quality-gates)
+    - [Linting and Type Checking](#linting-and-type-checking)
+    - [Code Formatting](#code-formatting)
+    - [Test Code Coverage](#test-code-coverage)
+    - [Documentation](#documentation)
+  - [Verification](#verification)
+    - [Manual Testing](#manual-testing)
+    - [Feature Verification Checklist](#feature-verification-checklist)
+  - [Components Modified](#components-modified)
+    - [Source Code](#source-code)
+    - [Test Code](#test-code)
+  - [Bug Status](#bug-status)
+    - [Original Bug Description (Phase 3.1)](#original-bug-description-phase-31)
+    - [Resolution](#resolution)
+  - [Summary](#summary)
+  - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 3: Background Image Variable Reference Implementation
 
 ## Overview

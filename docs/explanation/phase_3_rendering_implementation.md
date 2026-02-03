@@ -1,3 +1,44 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 3: Code Block Rendering Implementation](#phase-3-code-block-rendering-implementation)
+  - [Overview](#overview)
+  - [Implementation Details](#implementation-details)
+    - [Constants](#constants)
+    - [Height Calculation Method](#height-calculation-method)
+      - [`_calculate_code_block_height(code: str) -> float`](#_calculate_code_block_heightcode-str---float)
+    - [Background Color Configuration](#background-color-configuration)
+      - [Updated `__init__` Method](#updated-__init__-method)
+    - [Code Block Rendering](#code-block-rendering)
+      - [Integration in `add_slide_to_presentation()`](#integration-in-add_slide_to_presentation)
+    - [Placeholder Cleanup Update](#placeholder-cleanup-update)
+  - [Testing](#testing)
+    - [Test Coverage: 29 Tests (All Passing)](#test-coverage-29-tests-all-passing)
+      - [TestCodeBlockHeightCalculation (7 tests)](#testcodeblockheightcalculation-7-tests)
+      - [TestCodeBackgroundColor (5 tests)](#testcodebackgroundcolor-5-tests)
+      - [TestCodeBlockRendering (9 tests)](#testcodeblockrendering-9-tests)
+      - [TestCodeBlockEndToEnd (6 tests)](#testcodeblockendtoend-6-tests)
+      - [TestCodeBlockPositioning (3 tests)](#testcodeblockpositioning-3-tests)
+    - [Quality Gates Results](#quality-gates-results)
+  - [Examples](#examples)
+    - [Basic Code Block](#basic-code-block)
+    - [Multiple Code Blocks](#multiple-code-blocks)
+    - [Mixed Content Slide](#mixed-content-slide)
+    - [Custom Background Color](#custom-background-color)
+  - [Limitations and Trade-offs](#limitations-and-trade-offs)
+    - [Current Limitations](#current-limitations)
+    - [Design Trade-offs](#design-trade-offs)
+  - [Integration with Previous Phases](#integration-with-previous-phases)
+    - [Phase 1: Core Parsing](#phase-1-core-parsing)
+    - [Phase 2: Syntax Highlighting](#phase-2-syntax-highlighting)
+  - [Future Enhancements](#future-enhancements)
+  - [Deliverables](#deliverables)
+  - [Success Criteria](#success-criteria)
+  - [Conclusion](#conclusion)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 3: Code Block Rendering Implementation
 
 ## Overview

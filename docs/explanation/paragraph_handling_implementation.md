@@ -1,3 +1,35 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Paragraph Handling Implementation](#paragraph-handling-implementation)
+  - [Overview](#overview)
+  - [Problem Statement](#problem-statement)
+  - [Root Cause](#root-cause)
+  - [Solution](#solution)
+    - [Key Changes to `parse_slide_content`](#key-changes-to-parse_slide_content)
+  - [Implementation Details](#implementation-details)
+    - [Markdown Paragraph Rules](#markdown-paragraph-rules)
+    - [Line Joining](#line-joining)
+    - [Edge Cases](#edge-cases)
+  - [Testing](#testing)
+    - [Test Cases](#test-cases)
+    - [Coverage](#coverage)
+  - [Quality Gates](#quality-gates)
+  - [Backward Compatibility](#backward-compatibility)
+  - [Examples](#examples)
+    - [Before (Incorrect)](#before-incorrect)
+    - [After (Correct)](#after-correct)
+    - [Complex Example](#complex-example)
+  - [Related Documentation](#related-documentation)
+  - [Future Enhancements](#future-enhancements)
+  - [Migration Guide](#migration-guide)
+    - [What Changes](#what-changes)
+    - [What Stays the Same](#what-stays-the-same)
+  - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Paragraph Handling Implementation
 
 ## Overview

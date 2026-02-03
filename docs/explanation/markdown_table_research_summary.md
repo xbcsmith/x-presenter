@@ -1,3 +1,36 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Markdown Table Research Summary](#markdown-table-research-summary)
+  - [Executive Summary](#executive-summary)
+  - [Current State](#current-state)
+  - [Research Findings](#research-findings)
+    - [Markdown Table Syntax](#markdown-table-syntax)
+    - [PowerPoint Table API](#powerpoint-table-api)
+    - [Integration Points](#integration-points)
+  - [Proposed Solution](#proposed-solution)
+    - [Architecture](#architecture)
+    - [Feature Scope](#feature-scope)
+    - [Implementation Phases](#implementation-phases)
+  - [Design Decisions](#design-decisions)
+    - [Decision 1: Even Column Distribution](#decision-1-even-column-distribution)
+    - [Decision 2: Inline Formatting Only](#decision-2-inline-formatting-only)
+    - [Decision 3: Vertical Stacking Layout](#decision-3-vertical-stacking-layout)
+    - [Decision 4: Professional Default Styling](#decision-4-professional-default-styling)
+  - [Risk Assessment](#risk-assessment)
+    - [Low Risk](#low-risk)
+    - [Medium Risk](#medium-risk)
+    - [High Risk](#high-risk)
+  - [Success Criteria](#success-criteria)
+  - [Recommendations](#recommendations)
+    - [Immediate Actions](#immediate-actions)
+    - [Best Practices for Users](#best-practices-for-users)
+    - [Future Enhancements](#future-enhancements)
+  - [Conclusion](#conclusion)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Markdown Table Research Summary
 
 ## Executive Summary

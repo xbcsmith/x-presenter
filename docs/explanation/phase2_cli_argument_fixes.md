@@ -1,3 +1,36 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 2: Command-Line Argument Fixes Implementation](#phase-2-command-line-argument-fixes-implementation)
+  - [Overview](#overview)
+  - [Issues Fixed](#issues-fixed)
+    - [Issue 1: `--output` Flag Not Accepting Values](#issue-1---output-flag-not-accepting-values)
+    - [Issue 2: `--verbose` Flag Using Invalid Parameter](#issue-2---verbose-flag-using-invalid-parameter)
+  - [Implementation Details](#implementation-details)
+    - [Changes Made](#changes-made)
+      - [1. Fixed `--output` Argument Definition](#1-fixed---output-argument-definition)
+      - [2. Fixed `--verbose` Argument Definition](#2-fixed---verbose-argument-definition)
+    - [Integration Points](#integration-points)
+  - [Testing](#testing)
+    - [Test Coverage](#test-coverage)
+    - [Test Results](#test-results)
+    - [Quality Gates](#quality-gates)
+  - [Usage Examples](#usage-examples)
+    - [Before Phase 2](#before-phase-2)
+    - [After Phase 2](#after-phase-2)
+    - [Behavioral Details](#behavioral-details)
+      - [Output Path Handling](#output-path-handling)
+      - [Verbose Mode](#verbose-mode)
+  - [Success Criteria](#success-criteria)
+  - [Remaining Work](#remaining-work)
+  - [Lessons Learned](#lessons-learned)
+  - [Files Modified](#files-modified)
+  - [Files Not Modified](#files-not-modified)
+  - [Validation Checklist](#validation-checklist)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 2: Command-Line Argument Fixes Implementation
 
 ## Overview

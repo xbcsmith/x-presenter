@@ -1,3 +1,51 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 6: Markdown Headers and Text Layout Implementation](#phase-6-markdown-headers-and-text-layout-implementation)
+  - [Overview](#overview)
+  - [Problem Statement](#problem-statement)
+    - [1. Headers Ignored in Content](#1-headers-ignored-in-content)
+    - [2. Text Overflow and Placement Issues](#2-text-overflow-and-placement-issues)
+    - [3. Excessive Spacing](#3-excessive-spacing)
+  - [Solution Design](#solution-design)
+    - [1. Content Header Support (h3-h6)](#1-content-header-support-h3-h6)
+    - [2. Dynamic Height Calculation](#2-dynamic-height-calculation)
+    - [3. Optimized Spacing](#3-optimized-spacing)
+  - [Implementation Details](#implementation-details)
+    - [File: `src/presenter/converter.py`](#file-srcpresenterconverterpy)
+      - [1. Update `parse_slide_content()` Method](#1-update-parse_slide_content-method)
+      - [2. Update `add_slide_to_presentation()` Method](#2-update-add_slide_to_presentation-method)
+  - [Testing Strategy](#testing-strategy)
+    - [Test File: `tests/test_markdown_headers_and_layout.py`](#test-file-teststest_markdown_headers_and_layoutpy)
+      - [Class 1: TestMarkdownHeaderParsing (9 tests)](#class-1-testmarkdownheaderparsing-9-tests)
+      - [Class 2: TestTextPlacement (5 tests)](#class-2-testtextplacement-5-tests)
+      - [Class 3: TestSpacing (3 tests)](#class-3-testspacing-3-tests)
+      - [Class 4: TestHeaderFontSizes (5 tests)](#class-4-testheaderfontsizes-5-tests)
+      - [Class 5: TestBackwardCompatibility (3 tests)](#class-5-testbackwardcompatibility-3-tests)
+      - [Class 6: TestComplexSlides (3 tests)](#class-6-testcomplexslides-3-tests)
+  - [Quality Assurance](#quality-assurance)
+    - [Code Quality Gates](#code-quality-gates)
+    - [Documentation Quality](#documentation-quality)
+  - [Performance Impact](#performance-impact)
+    - [Benchmarks](#benchmarks)
+    - [Memory Usage](#memory-usage)
+  - [Examples](#examples)
+    - [Example 1: Content Headers](#example-1-content-headers)
+    - [Example 2: Mixed Content](#example-2-mixed-content)
+    - [Example 3: Dense Content](#example-3-dense-content)
+  - [Backward Compatibility](#backward-compatibility)
+    - [Compatibility Matrix](#compatibility-matrix)
+    - [Migration Guide](#migration-guide)
+  - [Known Limitations](#known-limitations)
+  - [Future Enhancements](#future-enhancements)
+    - [Potential Improvements](#potential-improvements)
+    - [Extensibility](#extensibility)
+  - [Validation Checklist](#validation-checklist)
+  - [Summary](#summary)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 6: Markdown Headers and Text Layout Implementation
 
 ## Overview

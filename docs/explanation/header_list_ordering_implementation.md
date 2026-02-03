@@ -1,3 +1,32 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Header and List Ordering Implementation](#header-and-list-ordering-implementation)
+  - [Overview](#overview)
+    - [Problem Statement](#problem-statement)
+  - [Root Cause](#root-cause)
+  - [Solution](#solution)
+    - [Changes to `parse_slide_content`](#changes-to-parse_slide_content)
+    - [Changes to `add_slide_to_presentation`](#changes-to-add_slide_to_presentation)
+  - [Implementation Details](#implementation-details)
+    - [Content Item Rendering](#content-item-rendering)
+    - [List Item Rendering](#list-item-rendering)
+    - [Vertical Spacing](#vertical-spacing)
+  - [Testing](#testing)
+    - [Test Cases](#test-cases)
+    - [Coverage](#coverage)
+  - [Quality Gates](#quality-gates)
+  - [Backward Compatibility](#backward-compatibility)
+  - [Examples](#examples)
+    - [Before (Incorrect Order)](#before-incorrect-order)
+    - [After (Correct Order)](#after-correct-order)
+  - [Future Enhancements](#future-enhancements)
+  - [Files Modified](#files-modified)
+  - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Header and List Ordering Implementation
 
 ## Overview

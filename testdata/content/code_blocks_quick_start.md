@@ -1,3 +1,23 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Code Blocks Quick Start](#code-blocks-quick-start)
+  - [Hello World in Python](#hello-world-in-python)
+  - [Function Definition](#function-definition)
+  - [Loop Example](#loop-example)
+  - [JavaScript Alert](#javascript-alert)
+  - [Bash Echo](#bash-echo)
+  - [SQL Select](#sql-select)
+  - [JSON Object](#json-object)
+  - [YAML Configuration](#yaml-configuration)
+  - [Mixed Content Example](#mixed-content-example)
+  - [Two Code Blocks](#two-code-blocks)
+  - [No Language Specified](#no-language-specified)
+  - [End of Quick Start](#end-of-quick-start)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Code Blocks Quick Start
 
 Simple examples to get started with code blocks in x-presenter.

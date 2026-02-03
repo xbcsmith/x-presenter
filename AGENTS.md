@@ -1,3 +1,31 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Critical Rules - MUST FOLLOW](#critical-rules---must-follow)
+  - [Rule 1: File Naming Conventions and Session Documentation](#rule-1-file-naming-conventions-and-session-documentation)
+    - [Summary Files - CRITICAL RESTRICTION](#summary-files---critical-restriction)
+    - [Markdown Files in docs/ and Other Directories](#markdown-files-in-docs-and-other-directories)
+    - [YAML Files](#yaml-files)
+  - [Rule 2: Code Quality Gates](#rule-2-code-quality-gates)
+  - [Rule 3: Documentation is Mandatory](#rule-3-documentation-is-mandatory)
+  - [Rule 4: Error Handling Patterns](#rule-4-error-handling-patterns)
+  - [Rule 5: Testing Requirements](#rule-5-testing-requirements)
+  - [Rule 6: Git Commit Conventions](#rule-6-git-commit-conventions)
+  - [Rule 7: No Emojis](#rule-7-no-emojis)
+  - [Rule 8: Documentation Quality Gates](#rule-8-documentation-quality-gates)
+  - [Documentation Organization (Diataxis Framework)](#documentation-organization-diataxis-framework)
+    - [Category 1: Tutorials (`docs/tutorials/`)](#category-1-tutorials-docstutorials)
+    - [Category 2: How-To Guides (`docs/how-to/`)](#category-2-how-to-guides-docshow-to)
+    - [Category 3: Explanations (`docs/explanation/`) ← DEFAULT FOR YOUR SUMMARIES](#category-3-explanations-docsexplanation-%E2%86%90-default-for-your-summaries)
+    - [Category 4: Reference (`docs/reference/`)](#category-4-reference-docsreference)
+    - [Decision Tree: Where to Put Documentation?](#decision-tree-where-to-put-documentation)
+  - [Copyright](#copyright)
+  - [Validation Checklist](#validation-checklist)
+  - [Emergency Quick Reference](#emergency-quick-reference)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Critical Rules - MUST FOLLOW
 
 **CRITICAL**: These rules are mandatory. Non-compliance will result in rejected

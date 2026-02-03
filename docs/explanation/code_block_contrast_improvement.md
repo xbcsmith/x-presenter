@@ -1,3 +1,22 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Code Block Contrast Improvement](#code-block-contrast-improvement)
+  - [Problem](#problem)
+  - [Solution](#solution)
+  - [Color Scheme Update](#color-scheme-update)
+    - [Background Color](#background-color)
+    - [Text Color (Default)](#text-color-default)
+    - [Syntax Highlighting Colors (Unchanged)](#syntax-highlighting-colors-unchanged)
+  - [Contrast Ratio](#contrast-ratio)
+  - [Files Modified](#files-modified)
+  - [Testing](#testing)
+  - [Backward Compatibility](#backward-compatibility)
+  - [Accessibility Impact](#accessibility-impact)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Code Block Contrast Improvement
 
 ## Problem

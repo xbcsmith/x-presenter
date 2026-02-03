@@ -1,3 +1,48 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Using Code Blocks](#using-code-blocks)
+  - [Basic Code Block](#basic-code-block)
+  - [Syntax](#syntax)
+  - [Supported Languages](#supported-languages)
+  - [Examples](#examples)
+    - [Python](#python)
+    - [JavaScript](#javascript)
+    - [Bash](#bash)
+    - [SQL](#sql)
+    - [JSON](#json)
+  - [Features](#features)
+    - [Monospace Font](#monospace-font)
+    - [Syntax Highlighting](#syntax-highlighting)
+    - [Background Color](#background-color)
+    - [Preserved Formatting](#preserved-formatting)
+    - [Auto Sizing](#auto-sizing)
+  - [Best Practices](#best-practices)
+    - [Keep Code Blocks Short](#keep-code-blocks-short)
+    - [Use Meaningful Names](#use-meaningful-names)
+    - [Add Comments](#add-comments)
+    - [Match Your Audience](#match-your-audience)
+    - [Test Your Examples](#test-your-examples)
+  - [Limitations](#limitations)
+    - [No Line Numbers](#no-line-numbers)
+    - [No Scrolling](#no-scrolling)
+    - [Single Background Color](#single-background-color)
+    - [Fixed Font](#fixed-font)
+  - [Combining with Other Slide Elements](#combining-with-other-slide-elements)
+  - [Common Patterns](#common-patterns)
+    - [Before and After](#before-and-after)
+    - [Multiple Language Comparison](#multiple-language-comparison)
+    - [Configuration Files](#configuration-files)
+  - [Troubleshooting](#troubleshooting)
+    - [Code Not Highlighted](#code-not-highlighted)
+    - [Code Block Cut Off](#code-block-cut-off)
+    - [Indentation Looks Wrong](#indentation-looks-wrong)
+    - [Language Not Supported](#language-not-supported)
+  - [Next Steps](#next-steps)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Using Code Blocks
 
 Code blocks allow you to display formatted source code in your presentations

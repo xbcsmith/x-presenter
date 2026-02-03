@@ -1,3 +1,34 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Underscore Italic Formatting Support](#underscore-italic-formatting-support)
+  - [Overview](#overview)
+  - [Problem Statement](#problem-statement)
+  - [Solution](#solution)
+    - [Changes to `_parse_markdown_formatting`](#changes-to-_parse_markdown_formatting)
+  - [Implementation Details](#implementation-details)
+    - [Regex Pattern Explanation](#regex-pattern-explanation)
+    - [Formatting Detection Logic](#formatting-detection-logic)
+  - [Supported Syntax](#supported-syntax)
+  - [Examples](#examples)
+    - [Basic Underscore Italic](#basic-underscore-italic)
+    - [Mixed Formatting](#mixed-formatting)
+    - [Real-World Use Case](#real-world-use-case)
+  - [Testing](#testing)
+    - [New Test Cases](#new-test-cases)
+    - [Test Coverage](#test-coverage)
+  - [Quality Gates](#quality-gates)
+  - [Backward Compatibility](#backward-compatibility)
+  - [Edge Cases](#edge-cases)
+  - [Related Documentation](#related-documentation)
+  - [Future Enhancements](#future-enhancements)
+  - [Migration Guide](#migration-guide)
+    - [Updating Existing Markdown](#updating-existing-markdown)
+  - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Underscore Italic Formatting Support
 
 ## Overview

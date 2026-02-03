@@ -1,3 +1,40 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Speaker Notes Implementation](#speaker-notes-implementation)
+  - [Overview](#overview)
+  - [Feature Description](#feature-description)
+  - [Implementation Details](#implementation-details)
+    - [Markdown Syntax](#markdown-syntax)
+    - [Architecture](#architecture)
+      - [1. Comment Extraction (`parse_slide_content`)](#1-comment-extraction-parse_slide_content)
+      - [2. Notes Insertion (`add_slide_to_presentation`)](#2-notes-insertion-add_slide_to_presentation)
+    - [Data Flow](#data-flow)
+  - [Technical Specifications](#technical-specifications)
+    - [Regex Pattern](#regex-pattern)
+    - [Data Structure](#data-structure)
+    - [PowerPoint Integration](#powerpoint-integration)
+  - [Features and Capabilities](#features-and-capabilities)
+    - [Supported Features](#supported-features)
+    - [Edge Cases Handled](#edge-cases-handled)
+    - [Limitations](#limitations)
+  - [Testing](#testing)
+    - [Test Coverage](#test-coverage)
+    - [Running Tests](#running-tests)
+    - [Test Results](#test-results)
+  - [Usage Examples](#usage-examples)
+    - [Basic Example](#basic-example)
+    - [Advanced Example](#advanced-example)
+    - [Multiple Notes Example](#multiple-notes-example)
+  - [Benefits](#benefits)
+  - [Future Enhancements](#future-enhancements)
+  - [Dependencies](#dependencies)
+  - [Backward Compatibility](#backward-compatibility)
+  - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Speaker Notes Implementation
 
 ## Overview

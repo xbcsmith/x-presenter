@@ -1,3 +1,37 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Presenter](#presenter)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Command Line](#command-line)
+    - [With Background Image](#with-background-image)
+    - [With Color Customization](#with-color-customization)
+    - [Usage Modes](#usage-modes)
+      - [Mode 1: Input/Output Pair](#mode-1-inputoutput-pair)
+      - [Mode 2: Single File with Auto Output](#mode-2-single-file-with-auto-output)
+      - [Mode 3: Multiple Files with Output Directory](#mode-3-multiple-files-with-output-directory)
+  - [Markdown Format](#markdown-format)
+    - [Slide Layouts](#slide-layouts)
+    - [Supported Elements](#supported-elements)
+    - [Tables](#tables)
+    - [Text Formatting](#text-formatting)
+    - [Speaker Notes](#speaker-notes)
+    - [Code Blocks](#code-blocks)
+    - [Multi-Line List Items](#multi-line-list-items)
+  - [Example](#example)
+  - [Development](#development)
+    - [Setup Development Environment](#setup-development-environment)
+    - [Project Structure](#project-structure)
+  - [Command-Line Options Reference](#command-line-options-reference)
+    - [Create Command Options](#create-command-options)
+  - [Requirements](#requirements)
+  - [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Presenter
 
 Convert Markdown presentations to PowerPoint format using `---` as slide

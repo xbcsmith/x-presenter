@@ -1,3 +1,43 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 6: Speaker Notes Implementation](#phase-6-speaker-notes-implementation)
+  - [Overview](#overview)
+  - [Motivation](#motivation)
+  - [Implementation Summary](#implementation-summary)
+    - [Changes Made](#changes-made)
+      - [1. Core Converter Enhancement](#1-core-converter-enhancement)
+    - [Data Structure Changes](#data-structure-changes)
+    - [Regex Implementation](#regex-implementation)
+  - [Testing](#testing)
+    - [Test Suite](#test-suite)
+    - [Test Results](#test-results)
+    - [Quality Gates](#quality-gates)
+  - [Usage Examples](#usage-examples)
+    - [Basic Speaker Note](#basic-speaker-note)
+    - [Multi-line Speaker Note](#multi-line-speaker-note)
+    - [Multiple Notes Per Slide](#multiple-notes-per-slide)
+  - [Features Supported](#features-supported)
+    - [Fully Supported](#fully-supported)
+    - [Known Limitations](#known-limitations)
+  - [Documentation](#documentation)
+    - [Files Created/Updated](#files-createdupdated)
+  - [Benefits](#benefits)
+    - [For Presenters](#for-presenters)
+    - [For Development](#for-development)
+    - [For Maintenance](#for-maintenance)
+  - [Technical Specifications](#technical-specifications)
+    - [Dependencies](#dependencies)
+    - [Performance](#performance)
+    - [Compatibility](#compatibility)
+  - [Validation Checklist](#validation-checklist)
+  - [Future Enhancements](#future-enhancements)
+  - [Conclusion](#conclusion)
+  - [References](#references)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Phase 6: Speaker Notes Implementation
 
 ## Overview

@@ -1,3 +1,22 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Phase 2 — Table Rendering Implementation](#phase-2--table-rendering-implementation)
+  - [Purpose](#purpose)
+  - [Preconditions / Prerequisites](#preconditions--prerequisites)
+  - [Overview](#overview)
+  - [Implementation details](#implementation-details)
+  - [Examples](#examples)
+  - [Testing](#testing)
+  - [Implementation notes and rationale](#implementation-notes-and-rationale)
+  - [Next steps / potential improvements](#next-steps--potential-improvements)
+  - [References](#references)
+  - [Validation Checklist (Phase 2)](#validation-checklist-phase-2)
+  - [Last updated](#last-updated)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 x-presenter/docs/explanation/phase_2_table_rendering_implementation.md
 # Phase 2 — Table Rendering Implementation
 
