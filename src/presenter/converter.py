@@ -1247,8 +1247,10 @@ class MarkdownToPowerPoint:
             >>> slides[0]
             '# Slide 1'
         """
-        # Split content by slide separator
-        slides = markdown_content.split(self.slide_separator)
+        # Split content by slide separator (must be on its own line to avoid matching tables)
+        # Use regex to match separator at start of line with optional whitespace
+        separator_pattern = f"^[ \\t]*{re.escape(self.slide_separator)}[ \\t]*$"
+        slides = re.split(separator_pattern, markdown_content, flags=re.MULTILINE)
 
         # Clean up each slide (remove extra whitespace)
         cleaned_slides = []
@@ -1733,6 +1735,242 @@ class MarkdownToPowerPoint:
 
         return slide_data
 
+    def _render_text_content(
+        self, slide, text: str, content_type: str, top_position: Any
+    ) -> Any:
+        """Render a text content block on the slide."""
+        content_box = slide.shapes.add_textbox(
+            Inches(0.5), top_position, Inches(9), Inches(0.5)
+        )
+        content_frame = content_box.text_frame
+        content_frame.word_wrap = True
+        content_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
+
+        p = content_frame.paragraphs[0]
+
+        # Set spacing based on type
+        if content_type.startswith("h"):
+            p.space_before = Pt(6)
+            p.space_after = Pt(3)
+        else:
+            p.space_before = Pt(3)
+            p.space_after = Pt(3)
+
+        # Apply formatting based on content type
+        segments = self._parse_markdown_formatting(text)
+        for segment in segments:
+            run = p.add_run()
+            run.text = segment["text"]
+            if segment["bold"]:
+                run.font.bold = True
+            if segment["italic"]:
+                run.font.italic = True
+            if segment["code"]:
+                run.font.name = "Courier New"
+
+            # Set font size based on content type
+            if content_type == "h3":
+                run.font.size = Pt(22)
+                run.font.bold = True
+            elif content_type == "h4":
+                run.font.size = Pt(20)
+                run.font.bold = True
+            elif content_type in ["h5", "h6"]:
+                run.font.size = Pt(18)
+                run.font.bold = True
+            else:
+                run.font.size = Pt(16)
+
+            if self.font_color:
+                run.font.color.rgb = self.font_color
+
+        # Better height estimation to prevent overlaps
+        # Assuming 9 inches width
+        if content_type == "h3":
+            chars_per_line = 50  # 22pt
+            line_height = 0.5
+        elif content_type == "h4":
+            chars_per_line = 60  # 20pt
+            line_height = 0.45
+        elif content_type in ["h5", "h6"]:
+            chars_per_line = 70  # 18pt
+            line_height = 0.4
+        else:
+            chars_per_line = 85  # 16pt
+            line_height = 0.35
+
+        # Calculate estimated number of lines
+        lines = 1
+        if len(text) > chars_per_line:
+            lines = (len(text) // chars_per_line) + 1
+
+        estimated_height = lines * line_height
+
+        return Inches(top_position.inches + estimated_height + 0.1)
+
+    def _render_list_block(self, slide, items: List[str], top_position: Any) -> Any:
+        """Render a list block on the slide."""
+        # Calculate height dynamically based on content length
+        total_list_height = 0
+        chars_per_line = 80  # List items are usually 14-16pt
+        line_height_per_item = 0.35
+
+        for item in items:
+            lines = 1
+            if len(item) > chars_per_line:
+                lines = (len(item) // chars_per_line) + 1
+            total_list_height += lines * line_height_per_item
+
+        list_height = max(total_list_height, 0.5)
+
+        list_box = slide.shapes.add_textbox(
+            Inches(1), top_position, Inches(8), Inches(list_height)
+        )
+        list_frame = list_box.text_frame
+        list_frame.clear()
+        list_frame.word_wrap = True
+
+        for i, item in enumerate(items):
+            if i == 0:
+                p = list_frame.paragraphs[0]
+            else:
+                p = list_frame.add_paragraph()
+
+            # Reduce spacing between list items
+            p.space_before = Pt(0)
+            p.space_after = Pt(3)
+
+            # Add bullet point and then formatted text
+            bullet_run = p.add_run()
+            bullet_run.text = "• "
+            bullet_run.font.size = Pt(16)
+            if self.font_color:
+                bullet_run.font.color.rgb = self.font_color
+
+            # Parse and apply markdown formatting to list item
+            segments = self._parse_markdown_formatting(item)
+            for segment in segments:
+                run = p.add_run()
+                run.text = segment["text"]
+                if segment["bold"]:
+                    run.font.bold = True
+                if segment["italic"]:
+                    run.font.italic = True
+                if segment["code"]:
+                    run.font.name = "Courier New"
+                run.font.size = Pt(14)
+                if self.font_color:
+                    run.font.color.rgb = self.font_color
+
+        return Inches(top_position.inches + list_height + 0.15)
+
+    def _render_code_block(
+        self, slide, code_block: Dict[str, str], top_position: Any
+    ) -> Any:
+        """Render a code block on the slide."""
+        code_text = code_block["code"]
+        language = code_block["language"]
+
+        # Calculate height (line-based) and add small padding so text doesn't touch edges.
+        # _calculate_code_block_height already enforces min/max; add padding and re-apply bounds.
+        block_height = self._calculate_code_block_height(code_text)
+        padding = 0.2  # inches total (0.1 top + 0.1 bottom)
+        # Ensure padding doesn't push us past the configured limits
+        block_height = min(
+            max(block_height + padding, CODE_BLOCK_MIN_HEIGHT),
+            CODE_BLOCK_MAX_HEIGHT,
+        )
+
+        # Create textbox for code
+        code_box = slide.shapes.add_textbox(
+            Inches(0.5),  # Left margin
+            top_position,
+            Inches(9),  # Width
+            Inches(block_height),
+        )
+
+        # Configure text frame
+        code_frame = code_box.text_frame
+        # For code blocks we want fixed shape height (calculated above) and preserved line breaks.
+        # Disable auto-resizing so the shape height remains the expected block_height.
+        # Also disable word wrap to preserve indentation and long lines; rely on horizontal scrolling
+        # or clipping rather than undesired wrapping which can change layout unpredictably.
+        code_frame.word_wrap = False
+        code_frame.auto_size = MSO_AUTO_SIZE.NONE
+        # Anchor text to top so the code appears at the top of the box
+        code_frame.vertical_anchor = MSO_ANCHOR.TOP
+        # Keep small margins so code doesn't touch the edges
+        code_frame.margin_left = Inches(0.1)
+        code_frame.margin_right = Inches(0.1)
+        code_frame.margin_top = Inches(0.1)
+        code_frame.margin_bottom = Inches(0.1)
+
+        # Set background color (light gray or configured color)
+        fill = code_box.fill
+        fill.solid()
+        fill.fore_color.rgb = self.code_background_color
+
+        # Add code with syntax highlighting
+        tokens = self._tokenize_code(code_text, language)
+
+        # First token goes in existing paragraph
+        p = code_frame.paragraphs[0]
+
+        for token in tokens:
+            text = token["text"]
+            # If token contains newline(s), split on '\n' and create new paragraphs for each newline.
+            # This preserves runs' colors and ensures multi-line whitespace tokens (e.g. " \n")
+            # are handled correctly rather than only matching exact "\n".
+            if "\n" in text:
+                parts = text.split("\n")
+                for idx, part in enumerate(parts):
+                    if part:
+                        run = p.add_run()
+                        run.text = part
+                        run.font.name = "Courier New"
+                        run.font.size = Pt(12)
+                        if token.get("color"):
+                            run.font.color.rgb = token["color"]
+                    # After each newline except the last, start a new paragraph
+                    if idx != len(parts) - 1:
+                        p = code_frame.add_paragraph()
+            else:
+                # Add run to current paragraph
+                run = p.add_run()
+                run.text = text
+                run.font.name = "Courier New"
+                run.font.size = Pt(12)
+                if token.get("color"):
+                    run.font.color.rgb = token["color"]
+
+        return Inches(top_position.inches + block_height + 0.15)
+
+    def _render_image(
+        self, slide, image_info: Dict[str, str], base_path: str, top_position: Any
+    ) -> Any:
+        """Render an image on the slide."""
+        image_path = image_info["path"]
+
+        # Handle relative paths
+        if not os.path.isabs(image_path):
+            if image_path.startswith("./"):
+                image_path = image_path[2:]
+            image_path = os.path.join(base_path, image_path)
+
+        if os.path.exists(image_path):
+            try:
+                # Add image to slide
+                slide.shapes.add_picture(
+                    image_path, Inches(2), top_position, height=Inches(3)
+                )
+                return Inches(top_position.inches + 3.5)
+            except Exception as e:
+                print(f"Warning: Could not add image {image_path}: {e}")
+        else:
+            print(f"Warning: Image not found: {image_path}")
+
+        return top_position
+
     def add_slide_to_presentation(
         self,
         slide_data: Dict[str, Any],
@@ -1862,109 +2100,17 @@ class MarkdownToPowerPoint:
         if "body" in slide_data and slide_data["body"]:
             for body_item in slide_data["body"]:
                 if body_item["type"] == "content":
-                    # Add single content item
-                    content_line = body_item["text"]
-                    content_type = body_item.get("content_type", "text")
-
-                    content_box = slide.shapes.add_textbox(
-                        Inches(0.5), top_position, Inches(9), Inches(0.5)
-                    )
-                    content_frame = content_box.text_frame
-                    content_frame.word_wrap = True
-                    content_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
-
-                    p = content_frame.paragraphs[0]
-
-                    # Set spacing based on type
-                    if content_type.startswith("h"):
-                        p.space_before = Pt(6)
-                        p.space_after = Pt(3)
-                    else:
-                        p.space_before = Pt(3)
-                        p.space_after = Pt(3)
-
-                    # Apply formatting based on content type
-                    segments = self._parse_markdown_formatting(content_line)
-                    for segment in segments:
-                        run = p.add_run()
-                        run.text = segment["text"]
-                        if segment["bold"]:
-                            run.font.bold = True
-                        if segment["italic"]:
-                            run.font.italic = True
-                        if segment["code"]:
-                            run.font.name = "Courier New"
-
-                        # Set font size based on content type
-                        if content_type == "h3":
-                            run.font.size = Pt(22)
-                            run.font.bold = True
-                        elif content_type == "h4":
-                            run.font.size = Pt(20)
-                            run.font.bold = True
-                        elif content_type in ["h5", "h6"]:
-                            run.font.size = Pt(18)
-                            run.font.bold = True
-                        else:
-                            run.font.size = Pt(16)
-
-                        if self.font_color:
-                            run.font.color.rgb = self.font_color
-
-                    top_position = Inches(
-                        top_position.inches
-                        + (
-                            content_frame.word_wrap
-                            and 0.4
-                            or len(content_line) / 80 * 0.3
-                        )
-                        + 0.1
+                    top_position = self._render_text_content(
+                        slide,
+                        body_item["text"],
+                        body_item.get("content_type", "text"),
+                        top_position,
                     )
 
                 elif body_item["type"] == "list":
-                    # Add list
-                    list_items = body_item["items"]
-                    list_height = max(len(list_items) * 0.35, 0.5)
-                    list_box = slide.shapes.add_textbox(
-                        Inches(1), top_position, Inches(8), Inches(list_height)
+                    top_position = self._render_list_block(
+                        slide, body_item["items"], top_position
                     )
-                    list_frame = list_box.text_frame
-                    list_frame.clear()
-                    list_frame.word_wrap = True
-
-                    for i, item in enumerate(list_items):
-                        if i == 0:
-                            p = list_frame.paragraphs[0]
-                        else:
-                            p = list_frame.add_paragraph()
-
-                        # Reduce spacing between list items
-                        p.space_before = Pt(0)
-                        p.space_after = Pt(3)
-
-                        # Add bullet point and then formatted text
-                        bullet_run = p.add_run()
-                        bullet_run.text = "• "
-                        bullet_run.font.size = Pt(16)
-                        if self.font_color:
-                            bullet_run.font.color.rgb = self.font_color
-
-                        # Parse and apply markdown formatting to list item
-                        segments = self._parse_markdown_formatting(item)
-                        for segment in segments:
-                            run = p.add_run()
-                            run.text = segment["text"]
-                            if segment["bold"]:
-                                run.font.bold = True
-                            if segment["italic"]:
-                                run.font.italic = True
-                            if segment["code"]:
-                                run.font.name = "Courier New"
-                            run.font.size = Pt(14)
-                            if self.font_color:
-                                run.font.color.rgb = self.font_color
-
-                    top_position = Inches(top_position.inches + list_height + 0.15)
 
                 elif body_item["type"] == "table":
                     # Render table using the Phase 2 renderer which creates a native pptx table.
@@ -2097,105 +2243,13 @@ class MarkdownToPowerPoint:
 
         # Add code blocks
         for code_block in slide_data.get("code_blocks", []):
-            code_text = code_block["code"]
-            language = code_block["language"]
-
-            # Calculate height (line-based) and add small padding so text doesn't touch edges.
-            # _calculate_code_block_height already enforces min/max; add padding and re-apply bounds.
-            block_height = self._calculate_code_block_height(code_text)
-            padding = 0.2  # inches total (0.1 top + 0.1 bottom)
-            # Ensure padding doesn't push us past the configured limits
-            block_height = min(
-                max(block_height + padding, CODE_BLOCK_MIN_HEIGHT),
-                CODE_BLOCK_MAX_HEIGHT,
-            )
-
-            # Create textbox for code
-            code_box = slide.shapes.add_textbox(
-                Inches(0.5),  # Left margin
-                top_position,
-                Inches(9),  # Width
-                Inches(block_height),
-            )
-
-            # Configure text frame
-            code_frame = code_box.text_frame
-            # For code blocks we want fixed shape height (calculated above) and preserved line breaks.
-            # Disable auto-resizing so the shape height remains the expected block_height.
-            # Also disable word wrap to preserve indentation and long lines; rely on horizontal scrolling
-            # or clipping rather than undesired wrapping which can change layout unpredictably.
-            code_frame.word_wrap = False
-            code_frame.auto_size = MSO_AUTO_SIZE.NONE
-            # Anchor text to top so the code appears at the top of the box
-            code_frame.vertical_anchor = MSO_ANCHOR.TOP
-            # Keep small margins so code doesn't touch the edges
-            code_frame.margin_left = Inches(0.1)
-            code_frame.margin_right = Inches(0.1)
-            code_frame.margin_top = Inches(0.1)
-            code_frame.margin_bottom = Inches(0.1)
-
-            # Set background color (light gray or configured color)
-            fill = code_box.fill
-            fill.solid()
-            fill.fore_color.rgb = self.code_background_color
-
-            # Add code with syntax highlighting
-            tokens = self._tokenize_code(code_text, language)
-
-            # First token goes in existing paragraph
-            p = code_frame.paragraphs[0]
-
-            for token in tokens:
-                text = token["text"]
-                # If token contains newline(s), split on '\n' and create new paragraphs for each newline.
-                # This preserves runs' colors and ensures multi-line whitespace tokens (e.g. " \n")
-                # are handled correctly rather than only matching exact "\n".
-                if "\n" in text:
-                    parts = text.split("\n")
-                    for idx, part in enumerate(parts):
-                        if part:
-                            run = p.add_run()
-                            run.text = part
-                            run.font.name = "Courier New"
-                            run.font.size = Pt(12)
-                            if token.get("color"):
-                                run.font.color.rgb = token["color"]
-                        # After each newline except the last, start a new paragraph
-                        if idx != len(parts) - 1:
-                            p = code_frame.add_paragraph()
-                else:
-                    # Add run to current paragraph
-                    run = p.add_run()
-                    run.text = text
-                    run.font.name = "Courier New"
-                    run.font.size = Pt(12)
-                    if token.get("color"):
-                        run.font.color.rgb = token["color"]
-
-            # Update position
-            top_position = Inches(top_position.inches + block_height + 0.15)
+            top_position = self._render_code_block(slide, code_block, top_position)
 
         # Add images
         for image_info in slide_data["images"]:
-            image_path = image_info["path"]
-
-            # Handle relative paths
-            if not os.path.isabs(image_path):
-                if image_path.startswith("./"):
-                    image_path = image_path[2:]
-                image_path = os.path.join(base_path, image_path)
-
-            if os.path.exists(image_path):
-                try:
-                    # Add image to slide
-                    slide.shapes.add_picture(
-                        image_path, Inches(2), top_position, height=Inches(3)
-                    )
-                    top_position = Inches(top_position.inches + 3.5)
-                except Exception as e:
-                    print(f"Warning: Could not add image {image_path}: {e}")
-            else:
-                print(f"Warning: Image not found: {image_path}")
+            top_position = self._render_image(
+                slide, image_info, base_path, top_position
+            )
 
         # Add speaker notes if present
         if slide_data.get("speaker_notes"):
