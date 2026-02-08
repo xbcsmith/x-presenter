@@ -256,9 +256,7 @@ def sample():
     return "test"
 ```"""
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 

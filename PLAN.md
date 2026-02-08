@@ -1,23 +1,5 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Planning Instructions for AI Agents](#planning-instructions-for-ai-agents)
-  - [Role & Responsibility](#role--responsibility)
-  - [Stopping Rules](#stopping-rules)
-  - [Workflow Process](#workflow-process)
-    - [AI-Optimized Implementation Standards](#ai-optimized-implementation-standards)
-    - [Interaction Loop](#interaction-loop)
-    - [Research Phase](#research-phase)
-  - [Style Guide](#style-guide)
-  - [Implementation Plan Template](#implementation-plan-template)
-  - [General Rules](#general-rules)
-  - [Architecture](#architecture)
-    - [Service Checklist](#service-checklist)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 ---
+
 description: Researches and outlines multi-step plans
 argument-hint: Outline the goal or problem to research
 ---

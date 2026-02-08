@@ -1,41 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Implementation Changelog](#implementation-changelog)
-  - [Phase 3: Integration Testing and Quality Assurance](#phase-3-integration-testing-and-quality-assurance)
-    - [Task 3.1: Create Integration Test File](#task-31-create-integration-test-file)
-    - [Task 3.2: Run Full Quality Gate Suite](#task-32-run-full-quality-gate-suite)
-  - [Phase 4: Documentation and Examples](#phase-4-documentation-and-examples)
-    - [Documentation Files Created](#documentation-files-created)
-      - [1. User Guide: `docs/how-to/using_code_blocks.md`](#1-user-guide-docshow-tousing_code_blocksmd)
-    - [2. Implementation Documentation: `docs/explanation/code_blocks_implementation.md`](#2-implementation-documentation-docsexplanationcode_blocks_implementationmd)
-    - [3. README Updates: `README.md`](#3-readme-updates-readmemd)
-    - [4. Example Markdown Files: `testdata/content/`](#4-example-markdown-files-testdatacontent)
-      - [a. `code_blocks_examples.md`](#a-code_blocks_examplesmd)
-      - [b. `code_blocks_quick_start.md`](#b-code_blocks_quick_startmd)
-  - [Quality Assurance](#quality-assurance)
-    - [Documentation Validation](#documentation-validation)
-    - [File Naming Compliance](#file-naming-compliance)
-    - [Documentation Location Compliance](#documentation-location-compliance)
-  - [Summary of Deliverables](#summary-of-deliverables)
-    - [Documentation Files (3)](#documentation-files-3)
-    - [README Updates (1)](#readme-updates-1)
-    - [Test Data Files (2)](#test-data-files-2)
-  - [Phase 4 Success Criteria Met](#phase-4-success-criteria-met)
-  - [Phase 5: Integration and Validation](#phase-5-integration-and-validation)
-    - [5.1 Bug Fixes - Markdown Formatting Regex](#51-bug-fixes---markdown-formatting-regex)
-    - [5.2 Integration Test Suite](#52-integration-test-suite)
-    - [5.3 Performance Testing Results](#53-performance-testing-results)
-    - [5.4 Backward Compatibility Verification](#54-backward-compatibility-verification)
-    - [5.5 Quality Gates Validation](#55-quality-gates-validation)
-    - [5.6 Documentation Quality](#56-documentation-quality)
-    - [5.7 Example Presentations](#57-example-presentations)
-  - [Phase 5 Success Criteria Met](#phase-5-success-criteria-met)
-  - [Summary of Code Blocks Feature - All Phases Complete](#summary-of-code-blocks-feature---all-phases-complete)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # Implementation Changelog
 
 Record of implementation changes and features for x-presenter code blocks.
@@ -46,23 +8,42 @@ Record of implementation changes and features for x-presenter code blocks.
 
 ### Task 3.1: Create Integration Test File
 
-Created integration test file `tests/test_table_integration_end_to_end.py` which provides end-to-end coverage for Markdown table conversion and rendering. The tests exercise real conversion flows: writing temporary Markdown files with tables and mixed content, invoking the converter to generate a `.pptx`, and loading the generated presentation with `python-pptx` to inspect shapes, images, and speaker notes.
+Created integration test file `tests/test_table_integration_end_to_end.py` which
+provides end-to-end coverage for Markdown table conversion and rendering. The
+tests exercise real conversion flows: writing temporary Markdown files with
+tables and mixed content, invoking the converter to generate a `.pptx`, and
+loading the generated presentation with `python-pptx` to inspect shapes, images,
+and speaker notes.
 
 Key test cases added:
 
-- `test_full_presentation_with_tables` — Converts a multi-slide Markdown document containing multiple tables and asserts the generated presentation contains native table shapes and that header cell text is preserved.
-- `test_table_with_all_content_types` — Converts a slide mixing a table with lists, inline code, an embedded image, and speaker notes; asserts presence of at least one table, an image shape, and the expected speaker notes text.
+- `test_full_presentation_with_tables` — Converts a multi-slide Markdown
+  document containing multiple tables and asserts the generated presentation
+  contains native table shapes and that header cell text is preserved.
+- `test_table_with_all_content_types` — Converts a slide mixing a table with
+  lists, inline code, an embedded image, and speaker notes; asserts presence of
+  at least one table, an image shape, and the expected speaker notes text.
 
 Implementation notes:
 
-- Tests write temporary markdown and image files, call `MarkdownToPowerPoint.convert(markdown_path, output_pptx_path)`, then open the generated PPTX using `pptx.Presentation` and inspect slide shapes.
-- Tests are defensive when accessing shape attributes (some python-pptx versions behave differently); they catch and skip shapes that raise on access to maintain robustness.
-- The test module uses `pytest.importorskip("pptx")` so test collection will skip the module if `python-pptx` is not installed in the environment. This prevents collection-time import errors while keeping the tests available in CI environments that include the dependency.
-- Temporary files are cleaned up after each test using `tempfile.TemporaryDirectory()` or explicit unlinking to avoid leaving artifacts.
+- Tests write temporary markdown and image files, call
+  `MarkdownToPowerPoint.convert(markdown_path, output_pptx_path)`, then open the
+  generated PPTX using `pptx.Presentation` and inspect slide shapes.
+- Tests are defensive when accessing shape attributes (some python-pptx versions
+  behave differently); they catch and skip shapes that raise on access to
+  maintain robustness.
+- The test module uses `pytest.importorskip("pptx")` so test collection will
+  skip the module if `python-pptx` is not installed in the environment. This
+  prevents collection-time import errors while keeping the tests available in CI
+  environments that include the dependency.
+- Temporary files are cleaned up after each test using
+  `tempfile.TemporaryDirectory()` or explicit unlinking to avoid leaving
+  artifacts.
 
 ### Task 3.2: Run Full Quality Gate Suite
 
-To validate integration and overall quality, the following steps are recommended and were executed in environments with the necessary dependencies:
+To validate integration and overall quality, the following steps are recommended
+and were executed in environments with the necessary dependencies:
 
 1. Install integration-test dependencies:
    - python-pptx (required for PPTX inspection)
@@ -83,6 +64,7 @@ To validate integration and overall quality, the following steps are recommended
    ```
 
 3. Run the test suite and coverage:
+
    ```bash
    pytest --maxfail=1 -q
    pytest --cov=src --cov-report=term-missing --cov-fail-under=80
@@ -90,9 +72,14 @@ To validate integration and overall quality, the following steps are recommended
 
 Notes and expectations:
 
-- In developer machines or CI where `python-pptx` is not present, the new integration test module will be skipped due to `pytest.importorskip("pptx")`. Unit tests that do not require `python-pptx` will run normally.
-- Ensure CI job(s) that execute the full quality gate install `python-pptx` so integration tests are executed and coverage targets are enforced.
-- Integration tests focus on validating real output (presence of table shapes, images, and speaker notes) rather than pixel-perfect rendering, which varies by PowerPoint client.
+- In developer machines or CI where `python-pptx` is not present, the new
+  integration test module will be skipped due to `pytest.importorskip("pptx")`.
+  Unit tests that do not require `python-pptx` will run normally.
+- Ensure CI job(s) that execute the full quality gate install `python-pptx` so
+  integration tests are executed and coverage targets are enforced.
+- Integration tests focus on validating real output (presence of table shapes,
+  images, and speaker notes) rather than pixel-perfect rendering, which varies
+  by PowerPoint client.
 
 ## Phase 4: Documentation and Examples
 
@@ -101,11 +88,17 @@ Notes and expectations:
 Notes:
 
 - Added Phase 4 documentation for Markdown table support:
-  - `x-presenter/docs/explanation/phase_4_markdown_table_support_implementation.md` created (implementation details, supported syntax, examples, testing guidance, and validation checklist).
-  - `x-presenter/README.md` updated to include a short "Tables" section referencing the new documentation.
-  - `x-presenter/docs/explanation/implementation.md` (this file) updated to record the Phase 4 table documentation deliverable.
-  - Integration tests that exercise native PowerPoint table rendering are present and are written to skip when `python-pptx` is not available.
-  - Ensure CI installs `python-pptx` and `Pillow` to run the end-to-end integration tests.
+  - `x-presenter/docs/explanation/phase_4_markdown_table_support_implementation.md`
+    created (implementation details, supported syntax, examples, testing
+    guidance, and validation checklist).
+  - `x-presenter/README.md` updated to include a short "Tables" section
+    referencing the new documentation.
+  - `x-presenter/docs/explanation/implementation.md` (this file) updated to
+    record the Phase 4 table documentation deliverable.
+  - Integration tests that exercise native PowerPoint table rendering are
+    present and are written to skip when `python-pptx` is not available.
+  - Ensure CI installs `python-pptx` and `Pillow` to run the end-to-end
+    integration tests.
 
 ### Documentation Files Created
 
@@ -117,9 +110,11 @@ Comprehensive user-facing documentation for the code blocks feature.
 
 - Overview of code block feature
 - Basic usage with syntax explanation
-- Complete list of supported languages (Python, JavaScript, Java, Go, Bash, SQL, YAML, JSON)
+- Complete list of supported languages (Python, JavaScript, Java, Go, Bash, SQL,
+  YAML, JSON)
 - Best practices for code on slides (keep short, meaningful names, add comments)
-- Limitations and workarounds (no line numbers, max height, fixed font, no scrolling)
+- Limitations and workarounds (no line numbers, max height, fixed font, no
+  scrolling)
 - Common patterns (before/after, language comparison, configuration files)
 - Troubleshooting guide
 - 13+ practical examples
@@ -251,8 +246,10 @@ prettier --write --parser markdown --prose-wrap always docs/explanation/code_blo
 All files follow project naming conventions:
 
 - ✅ User guide: `using_code_blocks.md` (lowercase, underscores)
-- ✅ Implementation doc: `code_blocks_implementation.md` (lowercase, underscores)
-- ✅ Examples: `code_blocks_examples.md`, `code_blocks_quick_start.md` (lowercase, underscores)
+- ✅ Implementation doc: `code_blocks_implementation.md` (lowercase,
+  underscores)
+- ✅ Examples: `code_blocks_examples.md`, `code_blocks_quick_start.md`
+  (lowercase, underscores)
 - ✅ README: `README.md` (only exception to lowercase rule)
 - ✅ No `.yml` files (all `.yaml` format)
 
@@ -299,13 +296,16 @@ All files in correct Diataxis framework locations:
 
 ### 5.1 Bug Fixes - Markdown Formatting Regex
 
-Fixed regex pattern in `_parse_markdown_formatting()` to correctly handle italic vs bold formatting.
+Fixed regex pattern in `_parse_markdown_formatting()` to correctly handle italic
+vs bold formatting.
 
-**Issue**: Pattern `\*.*?\*` was matching the opening `**` in bold text as italic, creating empty formatting segments.
+**Issue**: Pattern `\*.*?\*` was matching the opening `**` in bold text as
+italic, creating empty formatting segments.
 
 **Solution**: Updated pattern to `(?<!\*)\*(?!\*)[^*]*\*`:
 
-- Uses negative lookahead/lookbehind to prevent matching double asterisks as italic
+- Uses negative lookahead/lookbehind to prevent matching double asterisks as
+  italic
 - Correctly distinguishes between `*italic*` and `**bold**`
 - Allows empty formatting (e.g., `****` is valid bold)
 
@@ -315,19 +315,24 @@ Fixed regex pattern in `_parse_markdown_formatting()` to correctly handle italic
 
 ### 5.2 Integration Test Suite
 
-Created comprehensive integration test file: `tests/test_code_blocks_integration.py`
+Created comprehensive integration test file:
+`tests/test_code_blocks_integration.py`
 
 **Test Coverage** (26 new tests):
 
 - **TestCodeBlocksWithLists** (3 tests): Code blocks combined with bullet lists
 - **TestCodeBlocksWithText** (2 tests): Code blocks with paragraph text
 - **TestCodeBlocksWithSpeakerNotes** (1 test): Code blocks with speaker notes
-- **TestCodeBlocksMultipleSlidesPerDeck** (2 tests): Multiple code blocks across slides
+- **TestCodeBlocksMultipleSlidesPerDeck** (2 tests): Multiple code blocks across
+  slides
 - **TestCodeBlockLanguages** (3 tests): All supported languages and edge cases
-- **TestCodeBlockEdgeCases** (6 tests): Empty blocks, long code, special characters, indentation
-- **TestBackwardCompatibility** (4 tests): Inline code, formatting, existing features
+- **TestCodeBlockEdgeCases** (6 tests): Empty blocks, long code, special
+  characters, indentation
+- **TestBackwardCompatibility** (4 tests): Inline code, formatting, existing
+  features
 - **TestPerformance** (2 tests): Rendering performance with 10+ code blocks
-- **TestCodeBlocksEndToEnd** (3 tests): Realistic presentations (tutorial, API docs, comparison)
+- **TestCodeBlocksEndToEnd** (3 tests): Realistic presentations (tutorial, API
+  docs, comparison)
 
 **Test Results**:
 
@@ -340,7 +345,8 @@ Created comprehensive integration test file: `tests/test_code_blocks_integration
 **Performance Metrics**:
 
 - 10 code block slides: < 0.5 seconds (well under 5 second limit)
-- Complex documents (5 sections with code): < 0.3 seconds (well under 3 second limit)
+- Complex documents (5 sections with code): < 0.3 seconds (well under 3 second
+  limit)
 - No performance degradation vs baseline
 
 **Memory Usage**: No memory leaks detected
@@ -411,7 +417,8 @@ Verified that realistic presentations render correctly:
 
 ## Summary of Code Blocks Feature - All Phases Complete
 
-The code blocks feature is now fully implemented, tested, documented, and integrated.
+The code blocks feature is now fully implemented, tested, documented, and
+integrated.
 
 **Phase Overview**:
 
@@ -439,4 +446,5 @@ The code blocks feature is now fully implemented, tested, documented, and integr
 - ✅ Example presentations
 - ✅ Quality gates (100% passing)
 
-The project is ready for production use with code blocks feature fully operational.
+The project is ready for production use with code blocks feature fully
+operational.

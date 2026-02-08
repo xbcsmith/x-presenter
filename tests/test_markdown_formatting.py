@@ -8,9 +8,7 @@ import sys
 import tempfile
 
 # Add the src directory to Python path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from presenter.converter import MarkdownToPowerPoint
 
@@ -333,9 +331,7 @@ class TestMarkdownFormattingIntegration:
             with open(md_file, "w") as f:
                 f.write("# **Bold** Title\n\n- Item with `code`")
 
-            converter = MarkdownToPowerPoint(
-                font_color="FF0000", background_color="FFFFFF"
-            )
+            converter = MarkdownToPowerPoint(font_color="FF0000", background_color="FFFFFF")
             converter.convert(md_file, output_file)
 
             assert os.path.exists(output_file)

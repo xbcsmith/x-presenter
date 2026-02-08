@@ -30,11 +30,21 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "black>=22.0.0",
-    "flake8>=4.0.0",
-    "mypy>=0.950",
+lint = [
+    "ruff",
+]
+
+test = [
+    "coverage",
+    "pytest",
+    "mock",
+]
+
+build = [
+    "setuptools",
+    "wheel",
+    "build",
+    "twine",
 ]
 
 [project.scripts]
@@ -49,15 +59,6 @@ Issues = "https://github.com/xbcsmith/presenter/issues"
 where = ["src"]
 include = ["presenter*"]
 
-[tool.black]
-line-length = 88
-target-version = ['py38']
-
-[tool.mypy]
-python_version = "3.8"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -76,3 +77,20 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I", "RUF"]
+ignore = ["E402", "E501", "E731"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["presenter"]
+force-wrap-aliases = true
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true

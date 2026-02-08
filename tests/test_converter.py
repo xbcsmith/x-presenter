@@ -11,9 +11,7 @@ import zipfile
 import pytest
 
 # Add the src directory to Python path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from presenter.config import Config, ModelType
 from presenter.converter import MarkdownToPowerPoint, create_presentation
@@ -346,9 +344,7 @@ class TestCreatePresentation:
     def test_create_presentation_with_output_path(self):
         """Test creating presentation with output directory."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".md", dir=tmpdir, delete=False
-            ) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".md", dir=tmpdir, delete=False) as f:
                 f.write("# Test Title\nContent")
                 md_file = f.name
 
@@ -624,9 +620,7 @@ class TestRegressionPhase3BackgroundImage:
 
             converter = MarkdownToPowerPoint()
             # Should not raise an error even with non-existent background
-            converter.convert(
-                input_file, output_file, background_image="nonexistent.jpg"
-            )
+            converter.convert(input_file, output_file, background_image="nonexistent.jpg")
 
             assert os.path.exists(output_file)
 
@@ -741,9 +735,7 @@ class TestIntegrationAllFixes:
             output_file = os.path.join(tmpdir, "output.pptx")
 
             with open(input_file, "w") as f:
-                f.write(
-                    "# Title Slide\nIntroduction\n\n---\n\n## Slide 2\n- Point 1\n- Point 2"
-                )
+                f.write("# Title Slide\nIntroduction\n\n---\n\n## Slide 2\n- Point 1\n- Point 2")
 
             # Create a simple background image
             try:
@@ -926,11 +918,7 @@ More content here
             # Verify it has multiple slides
             with zipfile.ZipFile(output_file, "r") as zf:
                 # PPTX slides are in ppt/slides/
-                slide_files = [
-                    name
-                    for name in zf.namelist()
-                    if name.startswith("ppt/slides/slide")
-                ]
+                slide_files = [name for name in zf.namelist() if name.startswith("ppt/slides/slide")]
                 assert len(slide_files) >= 3
 
 

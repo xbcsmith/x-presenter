@@ -26,9 +26,7 @@ def remove_unused_placeholders(slide, has_title: bool, has_body_content: bool) -
             # Type 2 is body/content placeholder
             if placeholder.type == 1 and not has_title:  # Title placeholder unused
                 shapes_to_delete.append(shape)
-            elif (
-                placeholder.type == 2 and has_body_content
-            ):  # Body placeholder unused (we create our own)
+            elif placeholder.type == 2 and has_body_content:  # Body placeholder unused (we create our own)
                 shapes_to_delete.append(shape)
 
     # Remove the shapes (must be done after iteration)

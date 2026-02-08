@@ -81,9 +81,7 @@ class MarkdownToPowerPoint:
         """Wrapper for color parsing utility."""
         return parse_color(color_str)
 
-    def _remove_unused_placeholders(
-        self, slide, has_title: bool, has_body_content: bool
-    ) -> None:
+    def _remove_unused_placeholders(self, slide, has_title: bool, has_body_content: bool) -> None:
         """Wrapper for placeholder cleanup utility."""
         remove_unused_placeholders(slide, has_title, has_body_content)
 
@@ -109,9 +107,7 @@ class MarkdownToPowerPoint:
         left = Inches(0.5)
         top = top_position
         try:
-            tbl_shape = slide.shapes.add_table(
-                rows, cols, left, top, Inches(total_width), Inches(total_height)
-            )
+            tbl_shape = slide.shapes.add_table(rows, cols, left, top, Inches(total_width), Inches(total_height))
             tbl = tbl_shape.table
         except Exception:
             # Could not create a table; fallback to textual representation height
@@ -156,9 +152,7 @@ class MarkdownToPowerPoint:
 
         return total_height
 
-    def _apply_text_formatting(
-        self, text_frame, text: str, font_size: int = 18, color: RGBColor = None
-    ):
+    def _apply_text_formatting(self, text_frame, text: str, font_size: int = 18, color: RGBColor = None):
         """Apply markdown formatting to text frame."""
         text_frame.clear()
         p = text_frame.paragraphs[0]
@@ -177,13 +171,9 @@ class MarkdownToPowerPoint:
             if segment["code"]:
                 run.font.name = "Courier New"
 
-    def _render_text_content(
-        self, slide, text: str, content_type: str, top_position: Any
-    ) -> Any:
+    def _render_text_content(self, slide, text: str, content_type: str, top_position: Any) -> Any:
         """Render a text content block on the slide."""
-        content_box = slide.shapes.add_textbox(
-            Inches(0.5), top_position, Inches(9), Inches(0.5)
-        )
+        content_box = slide.shapes.add_textbox(Inches(0.5), top_position, Inches(9), Inches(0.5))
         content_frame = content_box.text_frame
         content_frame.word_wrap = True
         content_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
@@ -265,9 +255,7 @@ class MarkdownToPowerPoint:
 
         list_height = max(total_list_height, 0.5)
 
-        list_box = slide.shapes.add_textbox(
-            Inches(1), top_position, Inches(8), Inches(list_height)
-        )
+        list_box = slide.shapes.add_textbox(Inches(1), top_position, Inches(8), Inches(list_height))
         list_frame = list_box.text_frame
         list_frame.clear()
         list_frame.word_wrap = True
@@ -306,9 +294,7 @@ class MarkdownToPowerPoint:
 
         return Inches(top_position.inches + list_height + 0.15)
 
-    def _render_code_block(
-        self, slide, code_block: Dict[str, str], top_position: Any
-    ) -> Any:
+    def _render_code_block(self, slide, code_block: Dict[str, str], top_position: Any) -> Any:
         """Render a code block on the slide."""
         code_text = code_block["code"]
         language = code_block["language"]
@@ -387,9 +373,7 @@ class MarkdownToPowerPoint:
 
         return Inches(top_position.inches + block_height + 0.15)
 
-    def _render_image(
-        self, slide, image_info: Dict[str, str], base_path: str, top_position: Any
-    ) -> Any:
+    def _render_image(self, slide, image_info: Dict[str, str], base_path: str, top_position: Any) -> Any:
         """Render an image on the slide."""
         image_path = image_info["path"]
 
@@ -402,9 +386,7 @@ class MarkdownToPowerPoint:
         if os.path.exists(image_path):
             try:
                 # Add image to slide
-                slide.shapes.add_picture(
-                    image_path, Inches(2), top_position, height=Inches(3)
-                )
+                slide.shapes.add_picture(image_path, Inches(2), top_position, height=Inches(3))
                 return Inches(top_position.inches + 3.5)
             except Exception as e:
                 print(f"Warning: Could not add image {image_path}: {e}")
@@ -452,11 +434,11 @@ class MarkdownToPowerPoint:
         Examples:
             >>> converter = MarkdownToPowerPoint()
             >>> slide_data = {
-            ...     'title': 'My Slide',
-            ...     'content': ['Some text'],
-            ...     'lists': [['Item 1', 'Item 2']],
-            ...     'images': [],
-            ...     'speaker_notes': 'Remember to mention key points'
+            ...     "title": "My Slide",
+            ...     "content": ["Some text"],
+            ...     "lists": [["Item 1", "Item 2"]],
+            ...     "images": [],
+            ...     "speaker_notes": "Remember to mention key points",
             ... }
             >>> converter.add_slide_to_presentation(slide_data, is_title_slide=True)
             >>> len(converter.presentation.slides) == 1
@@ -492,9 +474,7 @@ class MarkdownToPowerPoint:
                     height=Inches(7.5),  # Standard slide height
                 )
             except Exception as e:
-                print(
-                    f"Warning: Could not add background image {self.background_image}: {e}"
-                )
+                print(f"Warning: Could not add background image {self.background_image}: {e}")
         elif self.background_image:
             print(f"Warning: Background image not found: {self.background_image}")
 
@@ -513,9 +493,7 @@ class MarkdownToPowerPoint:
                 # Set title to bold by default
                 for paragraph in slide.shapes.title.text_frame.paragraphs:
                     for run in paragraph.runs:
-                        if (
-                            not run.font.name == "Courier New"
-                        ):  # Don't override code font
+                        if not run.font.name == "Courier New":  # Don't override code font
                             run.font.bold = True
             # Title slides typically don't have body content, but track position anyway
             top_position = Inches(4.0)
@@ -531,9 +509,7 @@ class MarkdownToPowerPoint:
                 # Set title to bold by default
                 for paragraph in slide.shapes.title.text_frame.paragraphs:
                     for run in paragraph.runs:
-                        if (
-                            not run.font.name == "Courier New"
-                        ):  # Don't override code font
+                        if not run.font.name == "Courier New":  # Don't override code font
                             run.font.bold = True
             # Start content below the title
             top_position = Inches(1.5)
@@ -550,9 +526,7 @@ class MarkdownToPowerPoint:
                     )
 
                 elif body_item["type"] == "list":
-                    top_position = self._render_list_block(
-                        slide, body_item["items"], top_position
-                    )
+                    top_position = self._render_list_block(slide, body_item["items"], top_position)
 
                 elif body_item["type"] == "table":
                     # Render table using the Phase 2 renderer which creates a native pptx table.
@@ -562,11 +536,7 @@ class MarkdownToPowerPoint:
                     except Exception:
                         # If rendering fails for any reason, fallback to a textual rendering height.
                         rendered_height = max(
-                            (
-                                len(table.get("rows", []))
-                                + (1 if table.get("has_header") else 0)
-                            )
-                            * 0.25,
+                            (len(table.get("rows", [])) + (1 if table.get("has_header") else 0)) * 0.25,
                             0.5,
                         )
                     top_position = Inches(top_position.inches + rendered_height + 0.15)
@@ -579,9 +549,7 @@ class MarkdownToPowerPoint:
             estimated_height = min(estimated_height, 4.0)
             estimated_height = max(estimated_height, 0.5)
 
-            content_box = slide.shapes.add_textbox(
-                Inches(0.5), top_position, Inches(9), Inches(estimated_height)
-            )
+            content_box = slide.shapes.add_textbox(Inches(0.5), top_position, Inches(9), Inches(estimated_height))
             content_frame = content_box.text_frame
             content_frame.word_wrap = True
             content_frame.auto_size = MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT
@@ -590,11 +558,7 @@ class MarkdownToPowerPoint:
             for i, content_line in enumerate(slide_data["content"]):
                 if content_line.strip():
                     # Get content type (defaults to "text" for backward compatibility)
-                    content_type = (
-                        slide_data["content_types"][i]
-                        if i < len(slide_data["content_types"])
-                        else "text"
-                    )
+                    content_type = slide_data["content_types"][i] if i < len(slide_data["content_types"]) else "text"
 
                     if i == 0:
                         p = content_frame.paragraphs[0]
@@ -642,9 +606,7 @@ class MarkdownToPowerPoint:
             # Add lists with optimized spacing
             for list_items in slide_data.get("lists", []):
                 list_height = max(len(list_items) * 0.35, 0.5)
-                list_box = slide.shapes.add_textbox(
-                    Inches(1), top_position, Inches(8), Inches(list_height)
-                )
+                list_box = slide.shapes.add_textbox(Inches(1), top_position, Inches(8), Inches(list_height))
                 list_frame = list_box.text_frame
                 list_frame.clear()
                 list_frame.word_wrap = True
@@ -689,9 +651,7 @@ class MarkdownToPowerPoint:
 
         # Add images
         for image_info in slide_data["images"]:
-            top_position = self._render_image(
-                slide, image_info, base_path, top_position
-            )
+            top_position = self._render_image(slide, image_info, base_path, top_position)
 
         # Add speaker notes if present
         if slide_data.get("speaker_notes"):
@@ -740,11 +700,11 @@ class MarkdownToPowerPoint:
 
         Examples:
             >>> converter = MarkdownToPowerPoint()
-            >>> converter.convert('slides.md', 'output.pptx')
+            >>> converter.convert("slides.md", "output.pptx")
             Presentation saved to: output.pptx
 
-            >>> converter = MarkdownToPowerPoint(background_image='bg.jpg')
-            >>> converter.convert('slides.md', 'output.pptx')
+            >>> converter = MarkdownToPowerPoint(background_image="bg.jpg")
+            >>> converter.convert("slides.md", "output.pptx")
             Presentation saved to: output.pptx
         """
         # Set background image if provided
@@ -822,15 +782,13 @@ def create_presentation(cfg: Config) -> int:
     Examples:
         >>> from presenter.config import Config
         >>> from presenter.converter import create_presentation
-        >>> cfg = Config(filenames=['slides.md'], output_file='output.pptx')
+        >>> cfg = Config(filenames=["slides.md"], output_file="output.pptx")
         >>> create_presentation(cfg)
         Presentation saved to: output.pptx
         0
 
         >>> cfg = Config(
-        ...     filenames=['deck1.md', 'deck2.md'],
-        ...     output_path='./presentations/',
-        ...     background_path='template.jpg'
+        ...     filenames=["deck1.md", "deck2.md"], output_path="./presentations/", background_path="template.jpg"
         ... )
         >>> create_presentation(cfg)
         Presentation saved to: presentations/deck1.pptx

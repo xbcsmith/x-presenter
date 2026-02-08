@@ -1,33 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Using Slide Layouts](#using-slide-layouts)
-  - [Overview](#overview)
-  - [Slide Layout Types](#slide-layout-types)
-    - [Title Slide (Centered Layout)](#title-slide-centered-layout)
-    - [Title and Content Layout](#title-and-content-layout)
-  - [Common Scenarios](#common-scenarios)
-    - [Scenario 1: Standard Presentation](#scenario-1-standard-presentation)
-    - [Scenario 2: No Title Slide](#scenario-2-no-title-slide)
-    - [Scenario 3: Multiple Sections](#scenario-3-multiple-sections)
-  - [Tips and Best Practices](#tips-and-best-practices)
-    - [Creating an Effective Title Slide](#creating-an-effective-title-slide)
-    - [When to Use Single `#` vs Double `##`](#when-to-use-single--vs-double-)
-    - [Working with Speaker Notes](#working-with-speaker-notes)
-    - [Combining with Background Images](#combining-with-background-images)
-  - [Troubleshooting](#troubleshooting)
-    - [My First Slide Isn't Centered](#my-first-slide-isnt-centered)
-    - [I Want All Content Slides (No Title Slide)](#i-want-all-content-slides-no-title-slide)
-    - [I Want Multiple Title Slides](#i-want-multiple-title-slides)
-  - [Examples](#examples)
-    - [Minimal Presentation](#minimal-presentation)
-    - [Conference Talk](#conference-talk)
-  - [Summary](#summary)
-  - [Related Documentation](#related-documentation)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # Using Slide Layouts
 
 This guide explains how to use different slide layouts in your markdown

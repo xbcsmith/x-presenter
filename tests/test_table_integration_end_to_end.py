@@ -22,9 +22,7 @@ from typing import List
 import pytest
 
 # Make sure src is importable when running tests directly
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 # Skip the tests in this module early if python-pptx is not available.
 pytest.importorskip("pptx")
@@ -60,9 +58,7 @@ def _presentation_has_image(pres: Presentation) -> bool:
     return False
 
 
-def _presentation_has_speaker_notes(
-    pres: Presentation, expected_substring: str
-) -> bool:
+def _presentation_has_speaker_notes(pres: Presentation, expected_substring: str) -> bool:
     """Check if any slide's notes contain the expected substring."""
     for slide in pres.slides:
         try:
@@ -136,12 +132,9 @@ class TestTableIntegrationEndToEnd:
                             tbl = shape.table
                             # check first row cells contain any of the known header labels
                             first_row_texts: List[str] = [
-                                tbl.cell(0, c).text.strip()
-                                for c in range(tbl.columns.__len__())
+                                tbl.cell(0, c).text.strip() for c in range(tbl.columns.__len__())
                             ]
-                            if any(
-                                h in ("Metric", "Name", "Role") for h in first_row_texts
-                            ):
+                            if any(h in ("Metric", "Name", "Role") for h in first_row_texts):
                                 header_found = True
                                 break
                         except Exception:
@@ -211,9 +204,7 @@ class TestTableIntegrationEndToEnd:
             assert _count_tables_in_presentation(pres) >= 1
 
             # Expect at least one image (the tiny png we inserted)
-            assert _presentation_has_image(pres), (
-                "Expected an image shape in presentation"
-            )
+            assert _presentation_has_image(pres), "Expected an image shape in presentation"
 
             # Expect speaker notes to contain the NOTE text
             assert _presentation_has_speaker_notes(pres, "sensitive talking points"), (

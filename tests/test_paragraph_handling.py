@@ -116,10 +116,7 @@ context files."""
 
         assert slide_data["title"] == "The Workflow at a Glance"
         assert len(slide_data["body"]) == 1
-        expected = (
-            "AI models cannot maintain memory across sessions. "
-            "We must provide persistent context files."
-        )
+        expected = "AI models cannot maintain memory across sessions. We must provide persistent context files."
         assert slide_data["body"][0]["text"] == expected
 
     def test_multiple_paragraphs(self):
@@ -227,9 +224,7 @@ on two lines
 
         assert len(slide_data["body"]) == 1
         # Stripped lines should be joined with space
-        assert slide_data["body"][0]["text"] == (
-            "This line has leading spaces And another line with spaces"
-        )
+        assert slide_data["body"][0]["text"] == ("This line has leading spaces And another line with spaces")
 
     def test_paragraph_spacing_consistent(self):
         """Test multiple consecutive short lines are properly spaced."""

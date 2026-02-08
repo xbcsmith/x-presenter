@@ -1,24 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Code Blocks Examples](#code-blocks-examples)
-  - [Python Examples](#python-examples)
-  - [JavaScript Examples](#javascript-examples)
-  - [Bash Script Example](#bash-script-example)
-  - [SQL Query Example](#sql-query-example)
-  - [JSON Configuration](#json-configuration)
-  - [YAML Configuration](#yaml-configuration)
-  - [Java Example](#java-example)
-  - [Go Example](#go-example)
-  - [Mixed Content Slide](#mixed-content-slide)
-  - [Before and After Refactoring](#before-and-after-refactoring)
-  - [Multiple Code Blocks Per Slide](#multiple-code-blocks-per-slide)
-  - [No Language Specified](#no-language-specified)
-  - [Summary](#summary)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # Code Blocks Examples
 
 A comprehensive guide to using code blocks in x-presenter presentations.

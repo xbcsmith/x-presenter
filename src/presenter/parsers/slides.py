@@ -71,11 +71,11 @@ def parse_slide_content(slide_markdown: str) -> Dict[str, Any]:
     Examples:
         >>> content = "# Title\\n- Item 1\\n- Item 2"
         >>> data = parse_slide_content(content)
-        >>> data['title']
+        >>> data["title"]
         'Title'
-        >>> len(data['lists'])
+        >>> len(data["lists"])
         1
-        >>> data['lists'][0]
+        >>> data["lists"][0]
         ['Item 1', 'Item 2']
     """
     # First, extract all HTML comments as speaker notes
@@ -289,9 +289,7 @@ def parse_slide_content(slide_markdown: str) -> Dict[str, Any]:
             header_text = line_stripped[4:].strip()
             if slide_data["title"]:
                 # Title already set, treat as content
-                slide_data["body"].append(
-                    {"type": "content", "text": header_text, "content_type": "h3"}
-                )
+                slide_data["body"].append({"type": "content", "text": header_text, "content_type": "h3"})
             else:
                 # No title yet, use this as title (recover from malformed hierarchy)
                 slide_data["title"] = header_text
@@ -315,9 +313,7 @@ def parse_slide_content(slide_markdown: str) -> Dict[str, Any]:
             header_text = line_stripped[5:].strip()
             if slide_data["title"]:
                 # Title already set, treat as content
-                slide_data["body"].append(
-                    {"type": "content", "text": header_text, "content_type": "h4"}
-                )
+                slide_data["body"].append({"type": "content", "text": header_text, "content_type": "h4"})
             else:
                 # No title yet, use this as title
                 slide_data["title"] = header_text
@@ -341,9 +337,7 @@ def parse_slide_content(slide_markdown: str) -> Dict[str, Any]:
             header_text = line_stripped[6:].strip()
             if slide_data["title"]:
                 # Title already set, treat as content
-                slide_data["body"].append(
-                    {"type": "content", "text": header_text, "content_type": "h5"}
-                )
+                slide_data["body"].append({"type": "content", "text": header_text, "content_type": "h5"})
             else:
                 # No title yet, use this as title
                 slide_data["title"] = header_text
@@ -367,9 +361,7 @@ def parse_slide_content(slide_markdown: str) -> Dict[str, Any]:
             header_text = line_stripped[7:].strip()
             if slide_data["title"]:
                 # Title already set, treat as content
-                slide_data["body"].append(
-                    {"type": "content", "text": header_text, "content_type": "h6"}
-                )
+                slide_data["body"].append({"type": "content", "text": header_text, "content_type": "h6"})
             else:
                 # No title yet, use this as title
                 slide_data["title"] = header_text
@@ -470,10 +462,7 @@ def parse_slide_content(slide_markdown: str) -> Dict[str, Any]:
         import logging
 
         logger = logging.getLogger(__name__)
-        logger.warning(
-            "Unclosed code block detected at end of slide. "
-            "Code block will be added without closing fence."
-        )
+        logger.warning("Unclosed code block detected at end of slide. Code block will be added without closing fence.")
         slide_data["code_blocks"].append(current_code_block)
 
     # Backward compatibility: populate old content/content_types/lists fields

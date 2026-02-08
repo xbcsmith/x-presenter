@@ -8,9 +8,7 @@ import sys
 import tempfile
 
 # Add the src directory to Python path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from presenter.converter import MarkdownToPowerPoint
 
@@ -36,14 +34,10 @@ class TestRemoveUnusedPlaceholders:
         initial_placeholders = sum(1 for shape in slide.shapes if shape.is_placeholder)
 
         # Remove unused placeholders (no title, no body content yet)
-        converter._remove_unused_placeholders(
-            slide, has_title=False, has_body_content=False
-        )
+        converter._remove_unused_placeholders(slide, has_title=False, has_body_content=False)
 
         # Count remaining placeholders
-        remaining_placeholders = sum(
-            1 for shape in slide.shapes if shape.is_placeholder
-        )
+        remaining_placeholders = sum(1 for shape in slide.shapes if shape.is_placeholder)
 
         # Should have removed at least the title placeholder
         assert remaining_placeholders < initial_placeholders
@@ -64,14 +58,10 @@ class TestRemoveUnusedPlaceholders:
         initial_placeholders = sum(1 for shape in slide.shapes if shape.is_placeholder)
 
         # Remove unused placeholders (has title, has body content)
-        converter._remove_unused_placeholders(
-            slide, has_title=True, has_body_content=True
-        )
+        converter._remove_unused_placeholders(slide, has_title=True, has_body_content=True)
 
         # Count remaining placeholders
-        remaining_placeholders = sum(
-            1 for shape in slide.shapes if shape.is_placeholder
-        )
+        remaining_placeholders = sum(1 for shape in slide.shapes if shape.is_placeholder)
 
         # Should have removed body placeholder
         assert remaining_placeholders <= initial_placeholders
@@ -97,9 +87,7 @@ class TestRemoveUnusedPlaceholders:
                     break
 
         # Remove unused placeholders (has title, no body content)
-        converter._remove_unused_placeholders(
-            slide, has_title=True, has_body_content=False
-        )
+        converter._remove_unused_placeholders(slide, has_title=True, has_body_content=False)
 
         # Check title placeholder still exists
         title_placeholder_exists_after = False
@@ -255,9 +243,7 @@ class TestPlaceholderCleanupEdgeCases:
         slide = converter.presentation.slides.add_slide(slide_layout)
 
         # Remove unused placeholders (no title, no content)
-        converter._remove_unused_placeholders(
-            slide, has_title=False, has_body_content=False
-        )
+        converter._remove_unused_placeholders(slide, has_title=False, has_body_content=False)
 
         # Should have removed placeholders
         placeholders = [shape for shape in slide.shapes if shape.is_placeholder]
@@ -277,9 +263,7 @@ class TestPlaceholderCleanupEdgeCases:
             slide.shapes.title.text = "Title"
 
         # Remove unused placeholders
-        converter._remove_unused_placeholders(
-            slide, has_title=True, has_body_content=False
-        )
+        converter._remove_unused_placeholders(slide, has_title=True, has_body_content=False)
 
         # Count placeholders after
         placeholders_after = sum(1 for shape in slide.shapes if shape.is_placeholder)

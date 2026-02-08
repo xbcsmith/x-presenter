@@ -54,10 +54,7 @@ class TestMultiLineListItems:
             slide_data["lists"][0][0]
             == "a really long sentence that runs on for a long time that is unfortunate enough to wrap lines"
         )
-        assert (
-            slide_data["lists"][0][1]
-            == "another really long sentence that also wraps to the next line"
-        )
+        assert slide_data["lists"][0][1] == "another really long sentence that also wraps to the next line"
         assert slide_data["lists"][0][2] == "third item with wrap and continuation"
 
     def test_list_item_with_multiple_continuation_lines(self):
@@ -96,10 +93,7 @@ class TestMultiLineListItems:
         assert slide_data["lists"][0][0] == "short item"
         assert slide_data["lists"][0][1] == "long item that wraps to next line"
         assert slide_data["lists"][0][2] == "another short item"
-        assert (
-            slide_data["lists"][0][3]
-            == "final long item with continuation and more continuation"
-        )
+        assert slide_data["lists"][0][3] == "final long item with continuation and more continuation"
 
     def test_asterisk_list_with_continuation(self):
         """Test that asterisk-style lists also handle continuations."""
@@ -169,10 +163,7 @@ Regular content here"""
         assert len(slide_data["lists"]) == 1
         assert len(slide_data["lists"][0]) == 2
         assert slide_data["lists"][0][0] == "first item continuation"
-        assert (
-            slide_data["lists"][0][1]
-            == "second item starts here with its own continuation"
-        )
+        assert slide_data["lists"][0][1] == "second item starts here with its own continuation"
 
     def test_end_to_end_multiline_list_in_pptx(self):
         """Test that multi-line lists appear correctly in generated PowerPoint."""
@@ -184,9 +175,7 @@ Regular content here"""
 - another long sentence
   with continuation"""
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -205,9 +194,7 @@ Regular content here"""
                             if "electric sheep" in text and "wrap lines" in text:
                                 found_list = True
                                 # Both parts should be in the same bullet point
-                                assert (
-                                    "that is unfortunate enough to wrap lines" in text
-                                )
+                                assert "that is unfortunate enough to wrap lines" in text
                                 break
 
                     assert found_list, "Multi-line list item not found in presentation"

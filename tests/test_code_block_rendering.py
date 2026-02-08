@@ -373,9 +373,7 @@ console.log(x);
 echo "Hello"
 ```
 """
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_path = md_file.name
 
@@ -408,9 +406,7 @@ echo "Hello"
 x = 1
 ```
 """
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_path = md_file.name
 
@@ -441,9 +437,7 @@ x = 1
 {long_code}
 ```
 """
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_path = md_file.name
 
@@ -474,9 +468,7 @@ plain text code
 no language
 ```
 """
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_path = md_file.name
 
@@ -510,9 +502,7 @@ def example():
 
 More text after code.
 """
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_path = md_file.name
 

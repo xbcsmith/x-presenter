@@ -264,9 +264,7 @@ def get_syntax_color(token: str, language: str) -> Optional[RGBColor]:
     }
 
     # String detection (quoted text)
-    if (token.startswith('"') and token.endswith('"')) or (
-        token.startswith("'") and token.endswith("'")
-    ):
+    if (token.startswith('"') and token.endswith('"')) or (token.startswith("'") and token.endswith("'")):
         return colors["string"]
 
     # Comment detection (language-specific prefixes)
@@ -322,7 +320,7 @@ def tokenize_code(code: str, language: str) -> List[Dict[str, Any]]:
         >>> tokens = tokenize_code("x = 42", "python")
         >>> len(tokens) > 0
         True
-        >>> any(t['color'] == RGBColor(206, 145, 120) for t in tokens)
+        >>> any(t["color"] == RGBColor(206, 145, 120) for t in tokens)
         True
     """
     # If language is not supported, return single token with default color

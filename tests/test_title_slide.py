@@ -26,9 +26,7 @@ class TestTitleSlideLayout:
         markdown = "# Title Slide\n---\n## Content Slide"
         slides = converter.parse_markdown_slides(markdown)
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -58,9 +56,7 @@ class TestTitleSlideLayout:
         markdown = "## Subtitle Slide\n---\n## Another Slide"
         slides = converter.parse_markdown_slides(markdown)
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -89,9 +85,7 @@ class TestTitleSlideLayout:
         markdown = "Regular content\n---\n# Second Slide"
         slides = converter.parse_markdown_slides(markdown)
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -175,9 +169,7 @@ class TestTitleSlideContent:
         converter = MarkdownToPowerPoint()
         markdown = "# My Presentation Title"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -201,9 +193,7 @@ class TestTitleSlideContent:
         converter = MarkdownToPowerPoint()
         markdown = "# Title\n---\n## Content Slide Title"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -231,9 +221,7 @@ class TestMultipleSlidesLayout:
         converter = MarkdownToPowerPoint()
         markdown = "# Title\n---\n# Second\n---\n# Third"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -260,9 +248,7 @@ class TestMultipleSlidesLayout:
         converter = MarkdownToPowerPoint()
         markdown = "## Slide 1\n---\n## Slide 2\n---\n## Slide 3"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -290,9 +276,7 @@ class TestTitleSlideWithSpeakerNotes:
         converter = MarkdownToPowerPoint()
         markdown = "# Title Slide\n<!-- Speaker notes for title slide -->"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -357,9 +341,7 @@ class TestEdgeCases:
         # After strip() in parse, this becomes "# Title"
         markdown = "   # Title   \n---\n## Second"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 
@@ -380,9 +362,7 @@ class TestEdgeCases:
         converter = MarkdownToPowerPoint()
         markdown = "# Only Slide"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".md", delete=False
-        ) as md_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as md_file:
             md_file.write(markdown)
             md_file.flush()
 

@@ -20,9 +20,7 @@ from typing import List
 import pytest
 
 # Ensure src/ is importable when running tests directly
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 # Skip tests if python-pptx isn't installed
 pytest.importorskip("pptx")
@@ -102,8 +100,7 @@ class TestTableExampleIntegration:
                             tbl = shape.table
                             # Read first row texts
                             first_row_texts: List[str] = [
-                                tbl.cell(0, c).text.strip()
-                                for c in range(tbl.columns.__len__())
+                                tbl.cell(0, c).text.strip() for c in range(tbl.columns.__len__())
                             ]
                             if any(h in expected_headers for h in first_row_texts):
                                 header_found = True
@@ -113,6 +110,4 @@ class TestTableExampleIntegration:
                 if header_found:
                     break
 
-            assert header_found, (
-                "Expected header text (e.g. Name/Role/Metric) in at least one rendered table"
-            )
+            assert header_found, "Expected header text (e.g. Name/Role/Metric) in at least one rendered table"

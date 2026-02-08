@@ -58,12 +58,12 @@ def parse_markdown_formatting(text: str) -> List[Dict[str, Any]]:
         >>> segments = parse_markdown_formatting("**bold** text")
         >>> len(segments)
         2
-        >>> segments[0]['bold']
+        >>> segments[0]["bold"]
         True
-        >>> segments[1]['bold']
+        >>> segments[1]["bold"]
         False
         >>> segments = parse_markdown_formatting("_what_ we build")
-        >>> segments[1]['italic']
+        >>> segments[1]["italic"]
         True
     """
     # Pattern to match **bold**, *italic*, _italic_, `code`
@@ -98,27 +98,19 @@ def parse_markdown_formatting(text: str) -> List[Dict[str, Any]]:
         if matched_text.startswith("**") and matched_text.endswith("**"):
             # Bold
             inner_text = matched_text[2:-2]
-            segments.append(
-                {"text": inner_text, "bold": True, "italic": False, "code": False}
-            )
+            segments.append({"text": inner_text, "bold": True, "italic": False, "code": False})
         elif matched_text.startswith("*") and matched_text.endswith("*"):
             # Italic (single asterisk)
             inner_text = matched_text[1:-1]
-            segments.append(
-                {"text": inner_text, "bold": False, "italic": True, "code": False}
-            )
+            segments.append({"text": inner_text, "bold": False, "italic": True, "code": False})
         elif matched_text.startswith("_") and matched_text.endswith("_"):
             # Italic (underscore)
             inner_text = matched_text[1:-1]
-            segments.append(
-                {"text": inner_text, "bold": False, "italic": True, "code": False}
-            )
+            segments.append({"text": inner_text, "bold": False, "italic": True, "code": False})
         elif matched_text.startswith("`") and matched_text.endswith("`"):
             # Code (backticks)
             inner_text = matched_text[1:-1]
-            segments.append(
-                {"text": inner_text, "bold": False, "italic": False, "code": True}
-            )
+            segments.append({"text": inner_text, "bold": False, "italic": False, "code": True})
 
         last_end = match.end()
 

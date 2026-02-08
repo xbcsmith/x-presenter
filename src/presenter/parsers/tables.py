@@ -61,9 +61,7 @@ def is_table_row(line: str) -> bool:
         return False
 
     # If every cell is empty or consists only of dashes/colons, treat as not a content row
-    has_meaning = any(
-        re.search(r"\S", c) and not re.fullmatch(r"[:\- ]+", c) for c in cells
-    )
+    has_meaning = any(re.search(r"\S", c) and not re.fullmatch(r"[:\- ]+", c) for c in cells)
     return bool(has_meaning)
 
 
@@ -264,11 +262,7 @@ def calculate_table_dimensions(table_struct: Dict[str, Any]) -> Dict[str, Any]:
     rows = table_struct.get("rows", [])
     alignments = table_struct.get("alignments", [])
 
-    cols = (
-        len(alignments)
-        if alignments
-        else (len(headers) if headers else (len(rows[0]) if rows else 1))
-    )
+    cols = len(alignments) if alignments else (len(headers) if headers else (len(rows[0]) if rows else 1))
     rows_count = len(rows) + (1 if has_header and headers else 0)
     # Build row heights
     row_heights = []

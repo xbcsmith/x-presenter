@@ -108,24 +108,22 @@ md2ppt create input.md --background background.jpg
 md2ppt create file1.md file2.md --output ./out/ --background background.jpg
 ```
 
-### With Color Customization
-
-Customize slide colors using the color flags. All colors use hexadecimal format
-(`RRGGBB` or `#RRGGBB` - the `#` prefix is optional):
-
-```bash
 # Set content slide colors (# prefix is optional)
+
 md2ppt create input.md output.pptx --background-color 1E3A8A --font-color FFFFFF
 
 # Set title slide colors
+
 md2ppt create input.md output.pptx --title-bg-color 0F172A --title-font-color F59E0B
 
 # Combine multiple color options (with # prefix also works)
+
 md2ppt create input.md output.pptx \
     --background-color "#1E3A8A" \
     --font-color "#FFFFFF" \
     --title-bg-color "#0F172A" \
     --title-font-color "#F59E0B"
+
 ```
 
 Available color flags:

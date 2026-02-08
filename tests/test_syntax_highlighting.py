@@ -333,14 +333,14 @@ class TestSyntaxHighlightingIntegration:
     def test_go_code_block_tokenization(self):
         """Test that Go code blocks are properly tokenized."""
         converter = MarkdownToPowerPoint()
-        code = "package main\n\nfunc main() {\n  println(\"Hello\")\n}"
+        code = 'package main\n\nfunc main() {\n  println("Hello")\n}'
         tokens = converter._tokenize_code(code, "go")
         assert len(tokens) > 0
 
     def test_mixed_tokens_with_strings_and_comments(self):
         """Test code with mix of strings, comments, and keywords."""
         converter = MarkdownToPowerPoint()
-        code = '# Define\ndef add(a, b):\n    return a + b'
+        code = "# Define\ndef add(a, b):\n    return a + b"
         tokens = converter._tokenize_code(code, "python")
         assert len(tokens) > 0
         comment_tokens = [t for t in tokens if t["text"].startswith("#")]
@@ -356,7 +356,7 @@ class TestSyntaxHighlightingIntegration:
     def test_edge_case_special_characters(self):
         """Test edge case with special characters."""
         converter = MarkdownToPowerPoint()
-        code = 'result = x + y * (z - w) / 2'
+        code = "result = x + y * (z - w) / 2"
         tokens = converter._tokenize_code(code, "python")
         assert len(tokens) > 0
 
@@ -373,8 +373,16 @@ class TestSyntaxHighlightingIntegration:
         """Test that all supported languages are recognized."""
         converter = MarkdownToPowerPoint()
         languages = [
-            "python", "javascript", "js", "java", "go",
-            "bash", "shell", "sql", "yaml", "json",
+            "python",
+            "javascript",
+            "js",
+            "java",
+            "go",
+            "bash",
+            "shell",
+            "sql",
+            "yaml",
+            "json",
         ]
         for lang in languages:
             tokens = converter._tokenize_code("test", lang)
