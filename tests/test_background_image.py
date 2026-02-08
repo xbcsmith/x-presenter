@@ -84,9 +84,7 @@ class TestBackgroundImageInConvert:
         try:
             converter = MarkdownToPowerPoint()
             # Should not crash, but should print warning
-            converter.convert(
-                md_file, output_file, background_image="/nonexistent/bg.jpg"
-            )
+            converter.convert(md_file, output_file, background_image="/nonexistent/bg.jpg")
             assert os.path.exists(output_file)
         finally:
             for f in [md_file, output_file]:

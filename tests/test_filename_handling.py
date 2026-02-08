@@ -16,9 +16,7 @@ from pathlib import Path
 import pytest
 
 # Add the src directory to Python path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from presenter.config import Config
 from presenter.converter import create_presentation
@@ -313,9 +311,7 @@ class TestFilenameHandlingWithBackground:
 
         # Use the actual background image from testdata
         project_root = Path(__file__).parent.parent
-        bg_file = os.path.join(
-            str(project_root), "testdata", "content", "background.jpg"
-        )
+        bg_file = os.path.join(str(project_root), "testdata", "content", "background.jpg")
 
         return {
             "md_file": md_file,
@@ -506,8 +502,4 @@ class TestVerboseOutput:
             create_presentation(cfg)
 
         # Should contain conversion information or stdout message
-        assert (
-            "Converting" in caplog.text
-            or "Presentation saved to" in caplog.text
-            or len(caplog.records) > 0
-        )
+        assert "Converting" in caplog.text or "Presentation saved to" in caplog.text or len(caplog.records) > 0

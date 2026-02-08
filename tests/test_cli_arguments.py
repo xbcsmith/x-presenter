@@ -12,9 +12,7 @@ from unittest.mock import patch
 import pytest
 
 # Add the src directory to Python path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from presenter.config import Config
 from presenter.main import CmdLine

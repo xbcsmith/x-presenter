@@ -31,6 +31,10 @@ class Config(Model):
         output_path: Directory path for output files
         output_file: Explicit output filename (for single input/output pair mode)
         background_path: Path to background image file
+        background_color: Background color for content slides (hex format: RRGGBB or #RRGGBB)
+        font_color: Font color for content slides (hex format: RRGGBB or #RRGGBB)
+        title_bg_color: Background color for title slide (hex format: RRGGBB or #RRGGBB)
+        title_font_color: Font color for title slide (hex format: RRGGBB or #RRGGBB)
         verbose: Enable verbose output logging
         debug: Enable debug mode with detailed output
     """
@@ -39,5 +43,9 @@ class Config(Model):
     output_path: str = ""
     output_file: str = ""
     background_path: str = ""
+    background_color: str = ""
+    font_color: str = ""
+    title_bg_color: str = ""
+    title_font_color: str = ""
     verbose: bool = False
     debug: bool = False
